@@ -15,27 +15,26 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <linux/kernel.h>
-#include <linux/module.h>
+#ifndef __ASM_INLINES_H__
+#define __ASM_INLINES_H__
 
-#include "vmx.h"
+#include "types.h"
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Evgeny Yulyugin <yulyugin@gmail.com>");
-MODULE_DESCRIPTION("vmlatency");
-
-static int __init
-vmlatency_init(void)
+static inline void
+__cpuid_all(u32 leaf, u32 subleaf, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
 {
-        if (vmx_enabled())
-                vmlatency_printk("vmx_enabled\n");
-        return 0;
+        __asm__ __volatile__(
+                "cpuid"
+                :"=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx)
+                :"a"(leaf), "c"(subleaf));
 }
 
-static void __exit
-vmlatency_exit(void)
+static inline u32
+__cpuid_ecx(u32 leaf, u32 subleaf)
 {
+        u32 eax, ebx, ecx, edx;
+        __cpuid_all(leaf, subleaf, &eax, &ebx, &ecx, &edx);
+        return ecx;
 }
 
-module_init(vmlatency_init);
-module_exit(vmlatency_exit);
+#endif /* __ASM_INLINES_H__ */

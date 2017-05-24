@@ -15,27 +15,19 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <linux/kernel.h>
-#include <linux/module.h>
+#ifndef __CPU_DEFS_H__
+#define __CPU_DEFS_H__
 
-#include "vmx.h"
+#define BIT(n) (1ull << n)
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Evgeny Yulyugin <yulyugin@gmail.com>");
-MODULE_DESCRIPTION("vmlatency");
+/* MSR numbers */
+#define MSR_IA32_FEATURE_CONTROL 0x3a
 
-static int __init
-vmlatency_init(void)
-{
-        if (vmx_enabled())
-                vmlatency_printk("vmx_enabled\n");
-        return 0;
-}
+/* Fields of IA32_FEATURE_CONTROL MSR */
+#define FEATURE_CONTROL_LOCK_BIT               BIT(0)
+#define FEATURE_CONTROL_OUTSIDE_SMX_ENABLE_BIT BIT(2)
 
-static void __exit
-vmlatency_exit(void)
-{
-}
+/* CPUID bits */
+#define CPUID_1_ECX_VMX BIT(5)
 
-module_init(vmlatency_init);
-module_exit(vmlatency_exit);
+#endif /* __CPU_DEFS_H__ */

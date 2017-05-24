@@ -15,27 +15,13 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <linux/kernel.h>
-#include <linux/module.h>
+#ifndef __VMX_H__
+#define __VMX_H__
 
-#include "vmx.h"
+#include "types.h"
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Evgeny Yulyugin <yulyugin@gmail.com>");
-MODULE_DESCRIPTION("vmlatency");
+int vmlatency_printk(const char *fmt, ...);
 
-static int __init
-vmlatency_init(void)
-{
-        if (vmx_enabled())
-                vmlatency_printk("vmx_enabled\n");
-        return 0;
-}
+bool vmx_enabled(void);
 
-static void __exit
-vmlatency_exit(void)
-{
-}
-
-module_init(vmlatency_init);
-module_exit(vmlatency_exit);
+#endif /* __VMX_H__ */

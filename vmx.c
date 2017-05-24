@@ -15,27 +15,32 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <linux/kernel.h>
-#include <linux/module.h>
+#include <linux/printk.h>
 
 #include "vmx.h"
+#include "asm-inlines.h"
+#include "cpu-defs.h"
 
-MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Evgeny Yulyugin <yulyugin@gmail.com>");
-MODULE_DESCRIPTION("vmlatency");
-
-static int __init
-vmlatency_init(void)
+int
+vmlatency_printk(const char *fmt, ...)
 {
-        if (vmx_enabled())
-                vmlatency_printk("vmx_enabled\n");
-        return 0;
+        int ret;
+        va_list va;
+        va_start(va, fmt);
+        ret = vprintk(fmt, va);
+        va_end(va);
+        return ret;
 }
 
-static void __exit
-vmlatency_exit(void)
+static inline bool
+has_vmx(void)
 {
+        u32 ecx = __cpuid_ecx(1, 0);
+        return ecx & CPUID_1_ECX_VMX;
 }
 
-module_init(vmlatency_init);
-module_exit(vmlatency_exit);
+bool
+vmx_enabled()
+{
+        return has_vmx();
+}
