@@ -47,4 +47,22 @@ static inline u64 __rdmsr(u32 msr_num)
         return ((u64)edx << 32) | eax;
 }
 
+static inline u32
+__get_cr4(void)
+{
+        u64 cr4;
+        __asm__ __volatile__(
+                "movq %%cr4, %0"
+                :"=r"(cr4):);
+        return cr4;
+}
+
+static inline void
+__set_cr4(u64 cr4)
+{
+        __asm__ __volatile__(
+                "movq %0, %%cr4"
+                ::"r"(cr4));
+}
+
 #endif /* __ASM_INLINES_H__ */

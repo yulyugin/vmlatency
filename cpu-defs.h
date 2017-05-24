@@ -21,7 +21,9 @@
 #define __BIT(n) (1ull << n)
 
 /* MSR numbers */
-#define MSR_IA32_FEATURE_CTRL 0x3a /* IA32_FEATURE_CONTORL */
+#define IA32_FEATURE_CONTROL 0x3a
+
+#define IA32_VMX_BASIC       0x480
 
 /* Fields of IA32_FEATURE_CONTROL MSR */
 #define FEATURE_CONTROL_LOCK_BIT                   __BIT(0)
@@ -29,5 +31,8 @@
 
 /* CPUID bits */
 #define CPUID_1_ECX_VMX __BIT(5)
+
+/* Control registers */
+#define CR4_VMXE __BIT(13)
 
 #endif /* __CPU_DEFS_H__ */

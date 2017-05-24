@@ -22,11 +22,14 @@
 
 typedef struct vm_monitor {
         char *vmxon_region;
+        u64 old_vmxe;
 } vm_monitor_t;
 
 int vmlatency_printk(const char *fmt, ...);
 
 bool vmx_enabled(void);
+
+void print_vmx_info(void);
 
 void measure_vmlatency(void);
 

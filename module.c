@@ -30,6 +30,8 @@ vmlatency_init(void)
         if (!vmx_enabled())
                 return 0;
 
+        print_vmx_info();
+
         measure_vmlatency();
         return 0;
 }
