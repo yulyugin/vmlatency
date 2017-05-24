@@ -27,8 +27,10 @@ MODULE_DESCRIPTION("vmlatency");
 static int __init
 vmlatency_init(void)
 {
-        if (vmx_enabled())
-                vmlatency_printk("vmx_enabled\n");
+        if (!vmx_enabled())
+                return 0;
+
+        measure_vmlatency();
         return 0;
 }
 

@@ -16,6 +16,7 @@
 */
 
 #include <linux/printk.h>
+#include <linux/slab.h>
 
 #include "vmx.h"
 #include "asm-inlines.h"
@@ -30,6 +31,24 @@ vmlatency_printk(const char *fmt, ...)
         ret = vprintk(fmt, va);
         va_end(va);
         return ret;
+}
+
+static inline int
+allocate_vmxon_region(vm_monitor_t *vmm)
+{
+        vmm->vmxon_region = kmalloc(0x1000, GFP_KERNEL);
+        if (!vmm->vmxon_region) {
+                vmlatency_printk("Can't allocate vmxon region\n");
+                return -1;
+        }
+        return 0;
+}
+
+static inline void
+free_vmxon_region(vm_monitor_t *vmm)
+{
+        kfree(vmm->vmxon_region);
+        vmm->vmxon_region = NULL;
 }
 
 static inline bool
@@ -56,4 +75,14 @@ vmx_enabled()
         }
 
         return true;
+}
+
+void
+measure_vmlatency()
+{
+        vm_monitor_t vmm = {0};
+        if (allocate_vmxon_region(&vmm) != 0)
+                return;
+
+        free_vmxon_region(&vmm);
 }

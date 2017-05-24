@@ -20,8 +20,14 @@
 
 #include "types.h"
 
+typedef struct vm_monitor {
+        char *vmxon_region;
+} vm_monitor_t;
+
 int vmlatency_printk(const char *fmt, ...);
 
 bool vmx_enabled(void);
+
+void measure_vmlatency(void);
 
 #endif /* __VMX_H__ */

@@ -18,16 +18,16 @@
 #ifndef __CPU_DEFS_H__
 #define __CPU_DEFS_H__
 
-#define BIT(n) (1ull << n)
+#define __BIT(n) (1ull << n)
 
 /* MSR numbers */
-#define MSR_IA32_FEATURE_CONTROL 0x3a
+#define MSR_IA32_FEATURE_CTRL 0x3a /* IA32_FEATURE_CONTORL */
 
 /* Fields of IA32_FEATURE_CONTROL MSR */
-#define FEATURE_CONTROL_LOCK_BIT                   BIT(0)
-#define FEATURE_CONTROL_VMX_OUTSIDE_SMX_ENABLE_BIT BIT(2)
+#define FEATURE_CONTROL_LOCK_BIT                   __BIT(0)
+#define FEATURE_CONTROL_VMX_OUTSIDE_SMX_ENABLE_BIT __BIT(2)
 
 /* CPUID bits */
-#define CPUID_1_ECX_VMX BIT(5)
+#define CPUID_1_ECX_VMX __BIT(5)
 
 #endif /* __CPU_DEFS_H__ */
