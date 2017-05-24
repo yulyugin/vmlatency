@@ -54,6 +54,27 @@ free_vmxon_region(vm_monitor_t *vmm)
         vmm->vmxon_region_pa = 0;
 }
 
+static inline int
+allocate_vmcs(vm_monitor_t *vmm)
+{
+        vmm->vmcs = kmalloc(0x1000, GFP_KERNEL);
+        if (!vmm->vmcs) {
+                vmlatency_printk("Can't allocate vmcs region\n");
+                return -1;
+        }
+
+        vmm->vmcs_pa = virt_to_phys(vmm->vmcs);
+        return 0;
+}
+
+static inline void
+free_vmcs(vm_monitor_t *vmm)
+{
+        kfree(vmm->vmcs);
+        vmm->vmcs = NULL;
+        vmm->vmcs_pa = 0;
+}
+
 static inline bool
 has_vmx(void)
 {
@@ -93,6 +114,12 @@ vmxon_setup_revision_id(vm_monitor_t *vmm)
         ((u32 *)vmm->vmxon_region)[0] = get_vmcs_revision_identifier();
 }
 
+static inline void
+vmcs_setup_revision_id(vm_monitor_t *vmm)
+{
+        ((u32 *)vmm->vmcs)[0] = get_vmcs_revision_identifier();
+}
+
 static inline int
 do_vmxon(vm_monitor_t *vmm)
 {
@@ -125,6 +152,28 @@ do_vmxoff(vm_monitor_t *vmm)
         vmlatency_printk("VMXOFF succeeded\n");
 }
 
+static inline int
+do_vmptrld(vm_monitor_t *vmm)
+{
+        if (__vmptrld(vmm->vmcs_pa) != 0){
+                vmlatency_printk("VMPTRLD failed\n");
+                return -1;
+        }
+
+        return 0;
+}
+
+static inline int
+do_vmclear(vm_monitor_t *vmm)
+{
+        if (__vmclear(vmm->vmcs_pa) != 0){
+                vmlatency_printk("VMCLEAR failed\n");
+                return -1;
+        }
+
+        return 0;
+}
+
 void
 print_vmx_info()
 {
@@ -139,20 +188,31 @@ measure_vmlatency()
 
         if (allocate_vmxon_region(&vmm) != 0)
                 return;
-
         vmxon_setup_revision_id(&vmm);
+
+        if (allocate_vmcs(&vmm) != 0)
+                goto out1;
+        vmcs_setup_revision_id(&vmm);
 
         /* Disable interrupts */
         local_irq_disable();
 
         if (do_vmxon(&vmm) != 0)
-                goto out;
+                goto out2;
 
+        if (do_vmptrld(&vmm) != 0)
+                goto out3;
+
+        do_vmclear(&vmm);
+
+out3:
         do_vmxoff(&vmm);
 
-out:
+out2:
         /* Enable interrupts */
         local_irq_enable();
 
+        free_vmcs(&vmm);
+out1:
         free_vmxon_region(&vmm);
 }

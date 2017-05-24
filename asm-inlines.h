@@ -21,6 +21,11 @@
 #include "types.h"
 #include "cpu-defs.h"
 
+#define SAVE_RFLAGS(rflags) \
+        "pushfq;"           \
+        "popq %0;"          \
+        :"=r"(rflags)
+
 static inline void
 __cpuid_all(u32 leaf, u32 subleaf, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
 {
@@ -72,9 +77,7 @@ __vmxon(uintptr_t vmxon_region_pa)
         u64 rflags;
         __asm__ __volatile__(
                 "vmxon %1;"
-                "pushfq;"
-                "popq %0"
-                :"=r"(rflags)
+                SAVE_RFLAGS(rflags)
                 :"m"(vmxon_region_pa));
         if (rflags & (RFLAGS_CF | RFLAGS_ZF))
                 return -1;
@@ -87,9 +90,33 @@ __vmxoff(void)
         u64 rflags;
         __asm__ __volatile__(
                 "vmxoff;"
-                "pushfq;"
-                "popq %0"
-                :"=r"(rflags));
+                SAVE_RFLAGS(rflags));
+        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
+                return -1;
+        return 0;
+}
+
+static inline int
+__vmptrld(uintptr_t vmcs_pa)
+{
+        u64 rflags;
+        __asm__ __volatile__(
+                "vmptrld %1;"
+                SAVE_RFLAGS(rflags)
+                :"m"(vmcs_pa));
+        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
+                return -1;
+        return 0;
+}
+
+static inline int
+__vmclear(uintptr_t vmcs_pa)
+{
+        u64 rflags;
+        __asm__ __volatile__(
+                "vmclear %1;"
+                SAVE_RFLAGS(rflags)
+                :"m"(vmcs_pa));
         if (rflags & (RFLAGS_CF | RFLAGS_ZF))
                 return -1;
         return 0;
