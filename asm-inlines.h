@@ -19,6 +19,7 @@
 #define __ASM_INLINES_H__
 
 #include "types.h"
+#include "cpu-defs.h"
 
 static inline void
 __cpuid_all(u32 leaf, u32 subleaf, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
@@ -63,6 +64,35 @@ __set_cr4(u64 cr4)
         __asm__ __volatile__(
                 "movq %0, %%cr4"
                 ::"r"(cr4));
+}
+
+static inline int
+__vmxon(uintptr_t vmxon_region_pa)
+{
+        u64 rflags;
+        __asm__ __volatile__(
+                "vmxon %1;"
+                "pushfq;"
+                "popq %0"
+                :"=r"(rflags)
+                :"m"(vmxon_region_pa));
+        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
+                return -1;
+        return 0;
+}
+
+static inline int
+__vmxoff(void)
+{
+        u64 rflags;
+        __asm__ __volatile__(
+                "vmxoff;"
+                "pushfq;"
+                "popq %0"
+                :"=r"(rflags));
+        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
+                return -1;
+        return 0;
 }
 
 #endif /* __ASM_INLINES_H__ */

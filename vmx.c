@@ -41,6 +41,8 @@ allocate_vmxon_region(vm_monitor_t *vmm)
                 vmlatency_printk("Can't allocate vmxon region\n");
                 return -1;
         }
+
+        vmm->vmxon_region_pa = virt_to_phys(vmm->vmxon_region);
         return 0;
 }
 
@@ -49,6 +51,7 @@ free_vmxon_region(vm_monitor_t *vmm)
 {
         kfree(vmm->vmxon_region);
         vmm->vmxon_region = NULL;
+        vmm->vmxon_region_pa = 0;
 }
 
 static inline bool
@@ -90,7 +93,7 @@ vmxon_setup_revision_id(vm_monitor_t *vmm)
         ((u32 *)vmm->vmxon_region)[0] = get_vmcs_revision_identifier();
 }
 
-static inline void
+static inline int
 do_vmxon(vm_monitor_t *vmm)
 {
         u64 old_cr4 = __get_cr4();
@@ -99,14 +102,27 @@ do_vmxon(vm_monitor_t *vmm)
         /* Set CR4.VMXE if necessary */
         if (!vmm->old_vmxe)
                 __set_cr4(old_cr4 | CR4_VMXE);
+
+        if (__vmxon(vmm->vmxon_region_pa) != 0) {
+                vmlatency_printk("VMXON failed\n");
+                return -1;
+        }
+
+        vmlatency_printk("VMXON succeeded\n");
+        return 0;
 }
 
 static inline void
 do_vmxoff(vm_monitor_t *vmm)
 {
+        if (__vmxoff() != 0)
+                vmlatency_printk("VMXOFF failed\n");
+
         /* Clear CR4.VMXE if necessary */
         if (!vmm->old_vmxe)
                 __set_cr4(__get_cr4() & ~CR4_VMXE);
+
+        vmlatency_printk("VMXOFF succeeded\n");
 }
 
 void
@@ -129,9 +145,12 @@ measure_vmlatency()
         /* Disable interrupts */
         local_irq_disable();
 
-        do_vmxon(&vmm);
+        if (do_vmxon(&vmm) != 0)
+                goto out;
+
         do_vmxoff(&vmm);
 
+out:
         /* Enable interrupts */
         local_irq_enable();
 

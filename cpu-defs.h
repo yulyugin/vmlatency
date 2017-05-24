@@ -35,4 +35,8 @@
 /* Control registers */
 #define CR4_VMXE __BIT(13)
 
+/* RFLAGS fields */
+#define RFLAGS_CF __BIT(0)
+#define RFLAGS_ZF __BIT(6)
+
 #endif /* __CPU_DEFS_H__ */

@@ -22,6 +22,8 @@
 
 typedef struct vm_monitor {
         char *vmxon_region;
+        uintptr_t vmxon_region_pa;
+
         u64 old_vmxe;
 } vm_monitor_t;
 
