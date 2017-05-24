@@ -42,5 +42,18 @@ has_vmx(void)
 bool
 vmx_enabled()
 {
-        return has_vmx();
+        u64 feature_control;
+        if (!has_vmx()) {
+                vmlatency_printk("VMX is not supported\n");
+                return false;
+        }
+
+        feature_control = __rdmsr(MSR_IA32_FEATURE_CONTROL);
+        if (!(feature_control & FEATURE_CONTROL_LOCK_BIT) ||
+            !(feature_control & FEATURE_CONTROL_VMX_OUTSIDE_SMX_ENABLE_BIT)) {
+                vmlatency_printk("VMX is not enabled in BIOS\n");
+                return false;
+        }
+
+        return true;
 }

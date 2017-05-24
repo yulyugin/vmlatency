@@ -37,4 +37,14 @@ __cpuid_ecx(u32 leaf, u32 subleaf)
         return ecx;
 }
 
+static inline u64 __rdmsr(u32 msr_num)
+{
+        u32 eax, edx;
+        __asm__ __volatile__(
+                "rdmsr"
+                :"=a"(eax), "=d"(edx)
+                :"c"(msr_num));
+        return ((u64)edx << 32) | eax;
+}
+
 #endif /* __ASM_INLINES_H__ */
