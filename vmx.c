@@ -174,6 +174,11 @@ do_vmclear(vm_monitor_t *vmm)
         return 0;
 }
 
+static inline void
+initialize_vmcs(void)
+{
+}
+
 void
 print_vmx_info()
 {
@@ -203,11 +208,14 @@ measure_vmlatency()
         if (do_vmptrld(&vmm) != 0)
                 goto out3;
 
-        do_vmclear(&vmm);
+        initialize_vmcs();
 
+        if (__vmlaunch() != 0)
+                vmlatency_printk("VMLAUNCH failed\n");
+
+        do_vmclear(&vmm);
 out3:
         do_vmxoff(&vmm);
-
 out2:
         /* Enable interrupts */
         local_irq_enable();

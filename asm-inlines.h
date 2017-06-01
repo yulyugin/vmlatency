@@ -122,4 +122,16 @@ __vmclear(uintptr_t vmcs_pa)
         return 0;
 }
 
+static inline int
+__vmlaunch(void)
+{
+        u64 rflags;
+        __asm__ __volatile__(
+                "vmlaunch;"
+                SAVE_RFLAGS(rflags));
+        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
+                return -1;
+        return 0;
+}
+
 #endif /* __ASM_INLINES_H__ */
