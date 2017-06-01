@@ -42,6 +42,7 @@ allocate_vmxon_region(vm_monitor_t *vmm)
                 return -1;
         }
 
+        memset(vmm->vmxon_region, 0, 0x1000);
         vmm->vmxon_region_pa = virt_to_phys(vmm->vmxon_region);
         return 0;
 }
@@ -63,6 +64,7 @@ allocate_vmcs(vm_monitor_t *vmm)
                 return -1;
         }
 
+        memset(vmm->vmcs, 0, 0x1000);
         vmm->vmcs_pa = virt_to_phys(vmm->vmcs);
         return 0;
 }
