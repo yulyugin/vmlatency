@@ -21,6 +21,8 @@
 #include "types.h"
 #include "cpu-defs.h"
 
+#include <linux/version.h>
+
 #define SAVE_RFLAGS(rflags) \
         "pushfq;"           \
         "popq %0;"          \
@@ -43,6 +45,7 @@ __cpuid_ecx(u32 leaf, u32 subleaf)
         return ecx;
 }
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(4,11,0)
 static inline u64 __rdmsr(u32 msr_num)
 {
         u32 eax, edx;
@@ -52,6 +55,9 @@ static inline u64 __rdmsr(u32 msr_num)
                 :"c"(msr_num));
         return ((u64)edx << 32) | eax;
 }
+#else
+#include <asm/msr.h>
+#endif
 
 static inline u32
 __get_cr4(void)
