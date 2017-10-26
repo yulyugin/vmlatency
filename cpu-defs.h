@@ -39,4 +39,25 @@
 #define RFLAGS_CF __BIT(0)
 #define RFLAGS_ZF __BIT(6)
 
+/* VMCS guest state */
+#define VMCS_GUEST_ES     0x0800
+#define VMCS_GUEST_CS     0x0802
+#define VMCS_GUEST_SS     0x0804
+#define VMCS_GUEST_DS     0x0806
+#define VMCS_GUEST_FS     0x0808
+#define VMCS_GUEST_GS     0x080a
+#define VMCS_GUEST_LDTR   0x080c
+#define VMCS_GUEST_TR     0x080e
+#define VMCS_GUEST_RIP    0x681e
+
+/* VMCS host state */
+#define VMCS_HOST_ES      0x0c00
+#define VMCS_HOST_CS      0x0c02
+#define VMCS_HOST_SS      0x0c04
+#define VMCS_HOST_DS      0x0c06
+#define VMCS_HOST_FS      0x0c08
+#define VMCS_HOST_GS      0x0c0a
+#define VMCS_HOST_TR      0x0c0c
+#define VMCS_HOST_RIP     0x6c16
+
 #endif /* __CPU_DEFS_H__ */

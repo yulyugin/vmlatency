@@ -176,9 +176,42 @@ do_vmclear(vm_monitor_t *vmm)
         return 0;
 }
 
+/* Initialize guest state to match host state */
 static inline void
 initialize_vmcs(void)
 {
+        /* 16 bit state */
+        u16 val16;
+        __asm__ __volatile__("movw %%es, %0" :"=r"(val16));
+        __vmwrite(VMCS_GUEST_ES, val16);
+        __vmwrite(VMCS_HOST_ES, val16);
+
+        __asm__ __volatile__("movw %%cs, %0" :"=r"(val16));
+        __vmwrite(VMCS_GUEST_CS, val16);
+        __vmwrite(VMCS_HOST_CS, val16);
+
+        __asm__ __volatile__("movw %%ss, %0" :"=r"(val16));
+        __vmwrite(VMCS_GUEST_SS, val16);
+        __vmwrite(VMCS_HOST_SS, val16);
+
+        __asm__ __volatile__("movw %%ds, %0" :"=r"(val16));
+        __vmwrite(VMCS_GUEST_DS, val16);
+        __vmwrite(VMCS_HOST_DS, val16);
+
+        __asm__ __volatile__("movw %%fs, %0" :"=r"(val16));
+        __vmwrite(VMCS_GUEST_FS, val16);
+        __vmwrite(VMCS_HOST_FS, val16);
+
+        __asm__ __volatile__("movw %%gs, %0" :"=r"(val16));
+        __vmwrite(VMCS_GUEST_GS, val16);
+        __vmwrite(VMCS_HOST_GS, val16);
+
+        __asm__ __volatile__("str %0" :"=r"(val16));
+        __vmwrite(VMCS_GUEST_TR, val16);
+        __vmwrite(VMCS_HOST_TR, val16);
+
+        __asm__ __volatile__("sldt %0" :"=r"(val16));
+        __vmwrite(VMCS_GUEST_LDTR, val16);
 }
 
 void
@@ -212,9 +245,21 @@ measure_vmlatency()
 
         initialize_vmcs();
 
-        if (__vmlaunch() != 0)
-                vmlatency_printk("VMLAUNCH failed\n");
+        __vmwrite(VMCS_HOST_RIP, (u64)&&handle_vmexit);
+        __vmwrite(VMCS_GUEST_RIP, (u64)&&guest_code);
 
+        if (__vmlaunch() != 0) {
+                vmlatency_printk("VMLAUNCH failed\n");
+                goto out4;
+        }
+
+guest_code:
+        __asm__ __volatile__("cpuid"); // Will cause VM exit
+
+handle_vmexit:
+        vmlatency_printk("VM exit handled\n");
+
+out4:
         do_vmclear(&vmm);
 out3:
         do_vmxoff(&vmm);

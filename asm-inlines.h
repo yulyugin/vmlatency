@@ -140,4 +140,12 @@ __vmlaunch(void)
         return 0;
 }
 
+static inline void
+__vmwrite(u64 field, u64 value)
+{
+        __asm__ __volatile__(
+                "vmwrite %1, %0;"
+                ::"r"(field), "m"(value));
+}
+
 #endif /* __ASM_INLINES_H__ */
