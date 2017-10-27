@@ -213,10 +213,17 @@ initialize_vmcs(vm_monitor_t *vmm)
         __asm__ __volatile__("sldt %0" :"=r"(val16));
         __vmwrite(VMCS_GUEST_LDTR, val16);
 
-        /* 64-bit control state */
+        /* 64-bit control fields */
         __vmwrite(VMCS_IO_BITMAP_A_ADDR, vmm->io_bitmap_a_pa);
         __vmwrite(VMCS_IO_BITMAP_B_ADDR, vmm->io_bitmap_b_pa);
+        __vmwrite(VMCS_EXEC_VMCS_PTR, 0);
         __vmwrite(VMCS_TSC_OFFSET, 0);
+
+        /* 64-bit guest state */
+        __vmwrite(VMCS_VMCS_LINK_PTR, 0xffffffffffffffffull);
+        __vmwrite(VMCS_GUEST_IA32_DEBUGCTL, 0);
+
+        /* 32-bit control fields */
 }
 
 void

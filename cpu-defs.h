@@ -63,6 +63,11 @@
 /* 64-bit control fields */
 #define VMCS_IO_BITMAP_A_ADDR 0x2000
 #define VMCS_IO_BITMAP_B_ADDR 0x2002
+#define VMCS_EXEC_VMCS_PTR    0x200c
 #define VMCS_TSC_OFFSET       0x2010
+
+/* 64-bit guest state */
+#define VMCS_VMCS_LINK_PTR       0x2800
+#define VMCS_GUEST_IA32_DEBUGCTL 0x2802
 
 #endif /* __CPU_DEFS_H__ */
