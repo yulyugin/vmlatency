@@ -22,6 +22,29 @@
 #include "asm-inlines.h"
 #include "cpu-defs.h"
 
+#define REGISTER_PAGE(name)                                                 \
+static inline int                                                           \
+allocate_##name(vm_monitor_t *vmm)                                          \
+{                                                                           \
+        if (((vmm)->name = kmalloc(0x1000, GFP_KERNEL)) == NULL) return -1; \
+        memset((vmm)->name, 0, 0x1000);                                     \
+        (vmm)->name##_pa = virt_to_phys((vmm)->name);                       \
+        return 0;                                                           \
+}                                                                           \
+                                                                            \
+static inline void                                                          \
+free_##name(vm_monitor_t *vmm)                                              \
+{                                                                           \
+        kfree(vmm->name);                                                   \
+        vmm->name = NULL;                                                   \
+        vmm->name##_pa = 0;                                                 \
+}
+
+REGISTER_PAGE(vmxon_region)
+REGISTER_PAGE(io_bitmap_a)
+REGISTER_PAGE(io_bitmap_b)
+REGISTER_PAGE(vmcs)
+
 int
 vmlatency_printk(const char *fmt, ...)
 {
@@ -34,55 +57,13 @@ vmlatency_printk(const char *fmt, ...)
 }
 
 static inline int
-allocate_vmxon_region(vm_monitor_t *vmm)
-{
-        vmm->vmxon_region = kmalloc(0x1000, GFP_KERNEL);
-        if (!vmm->vmxon_region) {
-                vmlatency_printk("Can't allocate vmxon region\n");
-                return -1;
-        }
-
-        memset(vmm->vmxon_region, 0, 0x1000);
-        vmm->vmxon_region_pa = virt_to_phys(vmm->vmxon_region);
-        return 0;
-}
-
-static inline void
-free_vmxon_region(vm_monitor_t *vmm)
-{
-        kfree(vmm->vmxon_region);
-        vmm->vmxon_region = NULL;
-        vmm->vmxon_region_pa = 0;
-}
-
-static inline int
-allocate_vmcs(vm_monitor_t *vmm)
-{
-        vmm->vmcs = kmalloc(0x1000, GFP_KERNEL);
-        if (!vmm->vmcs) {
-                vmlatency_printk("Can't allocate vmcs region\n");
-                return -1;
-        }
-
-        memset(vmm->vmcs, 0, 0x1000);
-        vmm->vmcs_pa = virt_to_phys(vmm->vmcs);
-        return 0;
-}
-
-static inline void
-free_vmcs(vm_monitor_t *vmm)
-{
-        kfree(vmm->vmcs);
-        vmm->vmcs = NULL;
-        vmm->vmcs_pa = 0;
-}
-
-static inline int
 allocate_memory(vm_monitor_t *vmm)
 {
         int cnt = 0;
         if (allocate_vmxon_region(vmm) == 0) cnt++; else return -cnt;
         if (allocate_vmcs(vmm) == 0) cnt++; else return -cnt;
+        if (allocate_io_bitmap_a(vmm) == 0) cnt++; else return -cnt;
+        if (allocate_io_bitmap_b(vmm) == 0) cnt++; else return -cnt;
 
         return cnt;
 }
@@ -90,6 +71,8 @@ allocate_memory(vm_monitor_t *vmm)
 static inline void
 free_memory(vm_monitor_t *vmm, int cnt)
 {
+        if (cnt == 4) { free_io_bitmap_b(vmm); cnt--; }
+        if (cnt == 3) { free_io_bitmap_a(vmm); cnt--; }
         if (cnt == 2) { free_vmxon_region(vmm); cnt--; }
         if (cnt == 1) { free_vmcs(vmm); cnt--; }
 }
@@ -195,7 +178,7 @@ do_vmclear(vm_monitor_t *vmm)
 
 /* Initialize guest state to match host state */
 static inline void
-initialize_vmcs(void)
+initialize_vmcs(vm_monitor_t *vmm)
 {
         /* 16-bit guest/host state */
         u16 val16;
@@ -231,6 +214,8 @@ initialize_vmcs(void)
         __vmwrite(VMCS_GUEST_LDTR, val16);
 
         /* 64-bit control state */
+        __vmwrite(VMCS_IO_BITMAP_A_FULL, vmm->io_bitmap_a_pa);
+        __vmwrite(VMCS_IO_BITMAP_B_FULL, vmm->io_bitmap_b_pa);
 }
 
 void
@@ -261,7 +246,7 @@ measure_vmlatency()
         if (do_vmptrld(&vmm) != 0)
                 goto out3;
 
-        initialize_vmcs();
+        initialize_vmcs(&vmm);
 
         __vmwrite(VMCS_HOST_RIP, (u64)&&handle_vmexit);
         __vmwrite(VMCS_GUEST_RIP, (u64)&&guest_code);

@@ -60,4 +60,8 @@
 #define VMCS_HOST_TR      0x0c0c
 #define VMCS_HOST_RIP     0x6c16
 
+/* 64-bit control fields */
+#define VMCS_IO_BITMAP_A_FULL 0x2000
+#define VMCS_IO_BITMAP_B_FULL 0x2002
+
 #endif /* __CPU_DEFS_H__ */

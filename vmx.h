@@ -27,6 +27,11 @@ typedef struct vm_monitor {
         char *vmcs;
         uintptr_t vmcs_pa;
 
+        char *io_bitmap_a;
+        uintptr_t io_bitmap_a_pa;
+        char *io_bitmap_b;
+        uintptr_t io_bitmap_b_pa;
+
         u64 old_vmxe;
 } vm_monitor_t;
 
