@@ -77,6 +77,23 @@ free_vmcs(vm_monitor_t *vmm)
         vmm->vmcs_pa = 0;
 }
 
+static inline int
+allocate_memory(vm_monitor_t *vmm)
+{
+        int cnt = 0;
+        if (allocate_vmxon_region(vmm) == 0) cnt++; else return -cnt;
+        if (allocate_vmcs(vmm) == 0) cnt++; else return -cnt;
+
+        return cnt;
+}
+
+static inline void
+free_memory(vm_monitor_t *vmm, int cnt)
+{
+        if (cnt == 2) { free_vmxon_region(vmm); cnt--; }
+        if (cnt == 1) { free_vmcs(vmm); cnt--; }
+}
+
 static inline bool
 has_vmx(void)
 {
@@ -180,7 +197,7 @@ do_vmclear(vm_monitor_t *vmm)
 static inline void
 initialize_vmcs(void)
 {
-        /* 16 bit state */
+        /* 16-bit guest/host state */
         u16 val16;
         __asm__ __volatile__("movw %%es, %0" :"=r"(val16));
         __vmwrite(VMCS_GUEST_ES, val16);
@@ -212,6 +229,8 @@ initialize_vmcs(void)
 
         __asm__ __volatile__("sldt %0" :"=r"(val16));
         __vmwrite(VMCS_GUEST_LDTR, val16);
+
+        /* 64-bit control state */
 }
 
 void
@@ -226,12 +245,11 @@ measure_vmlatency()
 {
         vm_monitor_t vmm = {0};
 
-        if (allocate_vmxon_region(&vmm) != 0)
-                return;
-        vmxon_setup_revision_id(&vmm);
-
-        if (allocate_vmcs(&vmm) != 0)
+        int cnt = allocate_memory(&vmm);
+        if (cnt <= 0)
                 goto out1;
+
+        vmxon_setup_revision_id(&vmm);
         vmcs_setup_revision_id(&vmm);
 
         /* Disable interrupts */
@@ -266,8 +284,6 @@ out3:
 out2:
         /* Enable interrupts */
         local_irq_enable();
-
-        free_vmcs(&vmm);
 out1:
-        free_vmxon_region(&vmm);
+        free_memory(&vmm, cnt);
 }
