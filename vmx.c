@@ -224,6 +224,20 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_IA32_DEBUGCTL, 0);
 
         /* 32-bit control fields */
+        //__vmwrite(VMCS_PIN_BASED_VM_CTRL, );
+        //__vmwrite(VMCS_PROC_BASED_VM_CTRL, );
+        __vmwrite(VMCS_EXCEPTION_BITMAP, 0xffffffff);
+        __vmwrite(VMCS_PF_ECODE_MASK, 0);
+        __vmwrite(VMCS_PF_ECODE_MATCH, 0);
+        __vmwrite(VMCS_CR3_TARGET_CNT, 0);
+        //__vmwrite(VMCS_VMEXIT_CRTL, );
+        __vmwrite(VMCS_VMEXIT_MSR_STORE_CNT, 0);
+        __vmwrite(VMCS_VMEXIT_MSR_LOAD_CNT, 0);
+        //__vmwrite(VMCS_VMENTRY_CTRL, );
+        __vmwrite(VMCS_VMENTRY_MSR_LOAD_CNT, 0);
+        __vmwrite(VMCS_VMENTRY_INT_INFO, 0);
+        __vmwrite(VMCS_VMENTRY_ECODE, 0);
+        __vmwrite(VMCS_VMENTRY_INSTR_LEN, 0);
 }
 
 void

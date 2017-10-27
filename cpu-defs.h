@@ -70,4 +70,20 @@
 #define VMCS_VMCS_LINK_PTR       0x2800
 #define VMCS_GUEST_IA32_DEBUGCTL 0x2802
 
+/* 32-bit control fields */
+#define VMCS_PIN_BASED_VM_CTRL    0x4000
+#define VMCS_PROC_BASED_VM_CTRL   0x4002
+#define VMCS_EXCEPTION_BITMAP     0x4004
+#define VMCS_PF_ECODE_MASK        0x4006
+#define VMCS_PF_ECODE_MATCH       0x4008
+#define VMCS_CR3_TARGET_CNT       0x400a
+#define VMCS_VMEXIT_CTRL          0x400c
+#define VMCS_VMEXIT_MSR_STORE_CNT 0x400e
+#define VMCS_VMEXIT_MSR_LOAD_CNT  0x4010
+#define VMCS_VMENTRY_CTL          0x4012
+#define VMCS_VMENTRY_MSR_LOAD_CNT 0x4014
+#define VMCS_VMENTRY_INT_INFO     0x4016
+#define VMCS_VMENTRY_ECODE        0x4018
+#define VMCS_VMENTRY_INSTR_LEN    0x401a
+
 #endif /* __CPU_DEFS_H__ */
