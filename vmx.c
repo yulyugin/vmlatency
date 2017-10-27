@@ -214,8 +214,9 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_LDTR, val16);
 
         /* 64-bit control state */
-        __vmwrite(VMCS_IO_BITMAP_A_FULL, vmm->io_bitmap_a_pa);
-        __vmwrite(VMCS_IO_BITMAP_B_FULL, vmm->io_bitmap_b_pa);
+        __vmwrite(VMCS_IO_BITMAP_A_ADDR, vmm->io_bitmap_a_pa);
+        __vmwrite(VMCS_IO_BITMAP_B_ADDR, vmm->io_bitmap_b_pa);
+        __vmwrite(VMCS_TSC_OFFSET, 0);
 }
 
 void
