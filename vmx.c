@@ -344,10 +344,28 @@ print_vmx_info()
         }
 }
 
+static void
+cache_vmx_capabilities(vm_monitor_t *vmm)
+{
+        vmm->ia32_vmx_basic = __rdmsr(IA32_VMX_BASIC);
+        vmm->vmcs_revision_id = vmm->ia32_vmx_basic & 0x8fffffff;
+        vmm->has_true_ctls = vmm->ia32_vmx_basic & __BIT(55);
+
+        vmm->ia32_vmx_pinbased_ctls = __rdmsr(IA32_VMX_PINBASED_CTLS);
+        vmm->ia32_vmx_procbased_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS);
+
+        if (vmm->has_true_ctls) {
+                vmm->ia32_vmx_true_pinbased_ctls =
+                        __rdmsr(IA32_VMX_TRUE_PINBASED_CTLS);
+                vmm->ia32_vmx_procbased_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS);
+        }
+}
+
 void
 measure_vmlatency()
 {
         vm_monitor_t vmm = {0};
+        cache_vmx_capabilities(&vmm);
 
         int cnt = allocate_memory(&vmm);
         if (cnt <= 0)

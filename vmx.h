@@ -21,6 +21,21 @@
 #include "types.h"
 
 typedef struct vm_monitor {
+        /* Cached VMX capabilities */
+        u64 ia32_vmx_basic;
+        u32 vmcs_revision_id;
+        bool has_true_ctls;
+
+        u64 ia32_vmx_pinbased_ctls;
+        u64 ia32_vmx_true_pinbased_ctls;
+        u32 pinbased_allowed0;
+        u32 pinbased_allowed1;
+
+        u64 ia32_vmx_procbased_ctls;
+        u64 ia32_vmx_true_procbased_ctls;
+        u32 procbased_allowed0;
+        u32 procbased_allowed1;
+
         char *vmxon_region;
         uintptr_t vmxon_region_pa;
 
