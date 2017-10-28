@@ -313,6 +313,35 @@ print_vmx_info()
 {
         vmlatency_printk("VMCS revision identifier: %#lx\n",
                          get_vmcs_revision_identifier());
+
+        u64 ia32_vmx_basic = __rdmsr(IA32_VMX_BASIC);
+        vmlatency_printk("IA32_VMX_BASIC (%#x): %#llx\n", IA32_VMX_BASIC,
+                         ia32_vmx_basic);
+        bool has_true_ctls = ia32_vmx_basic & __BIT(55);
+
+        u64 ia32_vmx_pinbased_ctls = __rdmsr(IA32_VMX_PINBASED_CTLS);
+        vmlatency_printk("IA32_VMX_PINBASED_CTLS (%#x): %#llx\n",
+                         IA32_VMX_PINBASED_CTLS, ia32_vmx_pinbased_ctls);
+
+        if (has_true_ctls) {
+                u64 ia32_vmx_true_pinbased_ctls =
+                        __rdmsr(IA32_VMX_TRUE_PINBASED_CTLS);
+                vmlatency_printk("IA32_VMX_TRUE_PINBASED_CTLS (%#x): %#llx\n",
+                                 IA32_VMX_TRUE_PINBASED_CTLS,
+                                 ia32_vmx_true_pinbased_ctls);
+        }
+
+        u64 ia32_vmx_procbased_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS);
+        vmlatency_printk("IA32_VMX_PROCBASED_CTLS (%#x): %#llx\n",
+                         IA32_VMX_PROCBASED_CTLS, ia32_vmx_procbased_ctls);
+
+        if (has_true_ctls) {
+                u64 ia32_vmx_true_procbased_ctls =
+                        __rdmsr(IA32_VMX_TRUE_PROCBASED_CTLS);
+                vmlatency_printk("IA32_VMX_TRUE_PROCBASED_CTLS (%#x): %#llx\n",
+                                 IA32_VMX_TRUE_PROCBASED_CTLS,
+                                 ia32_vmx_true_procbased_ctls);
+        }
 }
 
 void

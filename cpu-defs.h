@@ -21,11 +21,30 @@
 #define __BIT(n) (1ull << n)
 
 /* MSR numbers */
-#define IA32_FEATURE_CONTROL 0x3a
-#define IA32_SYSENTER_CS     0x174
-#define IA32_SYSENTER_ESP    0x175
-#define IA32_SYSENTER_EIP    0x176
-#define IA32_VMX_BASIC       0x480
+#define IA32_FEATURE_CONTROL         0x3a
+
+#define IA32_SYSENTER_CS             0x174
+#define IA32_SYSENTER_ESP            0x175
+#define IA32_SYSENTER_EIP            0x176
+
+#define IA32_VMX_BASIC               0x480
+#define IA32_VMX_PINBASED_CTLS       0x481
+#define IA32_VMX_PROCBASED_CTLS      0x482
+#define IA32_VMX_EXIT_CTLS           0x483
+#define IA32_VMX_ENTRY_CTLS          0x484
+#define IA32_VMX_MSR_MISC            0x485
+#define IA32_VMX_CR0_FIXED0          0x486
+#define IA32_VMX_CR0_FIXED1          0x487
+#define IA32_VMX_CR4_FIXED0          0x488
+#define IA32_VMX_CR4_FIXED1          0x489
+#define IA32_VMX_VMCS_ENUM           0x48a
+#define IA32_VMX_PROCBASED_CTLS2     0x48b
+#define IA32_VMX_EPT_VPID_CAP        0x48c
+#define IA32_VMX_TRUE_PINBASED_CTLS  0x48d
+#define IA32_VMX_TRUE_PROCBASED_CTLS 0x48e
+#define IA32_VMX_TRUE_EXIT_CTLS      0x48f
+#define IA32_VMX_TRUE_ENTRY_CTLS     0x490
+#define IA32_VMX_VMFUNC              0x491
 
 /* Fields of IA32_FEATURE_CONTROL MSR */
 #define FEATURE_CONTROL_LOCK_BIT                   __BIT(0)
