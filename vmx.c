@@ -181,7 +181,6 @@ static inline void
 initialize_vmcs(vm_monitor_t *vmm)
 {
         u16 val16;
-        u64 ia32_sysenter_cs;
 
         /* 16-bit guest/host state */
         __asm__ __volatile__("movw %%es, %0" :"=r"(val16));
@@ -261,19 +260,52 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_GDTR_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_IDTR_LIMIT, 0xffffffff);
 
-        ia32_sysenter_cs = __rdmsr(IA32_SYSENTER_CS);
+        u32 ia32_sysenter_cs = __rdmsr(IA32_SYSENTER_CS);
         __vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, ia32_sysenter_cs);
         __vmwrite(VMCS_HOST_IA32_SYSENTER_CS, ia32_sysenter_cs);
 
-        /* Natural-width control fields */
+        /* Control registers */
+        u32 cr0 = __get_cr0();
+        __vmwrite(VMCS_GUEST_CR0, cr0);
+        __vmwrite(VMCS_HOST_CR0, cr0);
         __vmwrite(VMCS_CR0_GUEST_HOST_MASK, 0);
         __vmwrite(VMCS_CR0_READ_SHADOW, 0);
+
+        u32 cr4 = __get_cr4();
+        __vmwrite(VMCS_GUEST_CR4, cr4);
+        __vmwrite(VMCS_HOST_CR4, cr4);
         __vmwrite(VMCS_CR4_GUEST_HOST_MASK, 0);
         __vmwrite(VMCS_CR4_READ_SHADOW, 0);
+
+        u32 cr3 = __get_cr3();
+        __vmwrite(VMCS_GUEST_CR3, cr3);
+        __vmwrite(VMCS_HOST_CR3, cr3);
         __vmwrite(VMCS_CR3_TARGET_VALUE_0, 0);
         __vmwrite(VMCS_CR3_TARGET_VALUE_1, 0);
         __vmwrite(VMCS_CR3_TARGET_VALUE_2, 0);
         __vmwrite(VMCS_CR3_TARGET_VALUE_3, 0);
+
+        /* Natural-width guest/host state */
+        __vmwrite(VMCS_GUEST_DR7, 0x400); /* Initial value */
+
+        u64 rsp;
+        __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
+        __vmwrite(VMCS_GUEST_RSP, rsp);
+        __vmwrite(VMCS_HOST_RSP, rsp);
+
+        u64 rflags;
+        __asm__ __volatile__(SAVE_RFLAGS(rflags));
+        __vmwrite(VMCS_GUEST_RFLAGS, rflags);
+
+        __vmwrite(VMCS_GUEST_PENDING_DBG_EXCEPTION, 0);
+
+        u64 ia32_sysenter_esp = __rdmsr(IA32_SYSENTER_ESP);
+        __vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, ia32_sysenter_esp);
+        __vmwrite(VMCS_HOST_IA32_SYSENTER_ESP, ia32_sysenter_esp);
+
+        u64 ia32_sysenter_eip = __rdmsr(IA32_SYSENTER_EIP);
+        __vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, ia32_sysenter_esp);
+        __vmwrite(VMCS_HOST_IA32_SYSENTER_EIP, ia32_sysenter_eip);
 }
 
 void

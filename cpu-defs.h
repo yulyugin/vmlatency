@@ -23,6 +23,8 @@
 /* MSR numbers */
 #define IA32_FEATURE_CONTROL 0x3a
 #define IA32_SYSENTER_CS     0x174
+#define IA32_SYSENTER_ESP    0x175
+#define IA32_SYSENTER_EIP    0x176
 #define IA32_VMX_BASIC       0x480
 
 /* Fields of IA32_FEATURE_CONTROL MSR */
@@ -79,7 +81,27 @@
 #define VMCS_GUEST_SMBASE                 0x4828
 #define VMCS_GUEST_IA32_SYSENTER_CS       0x482a
 
-#define VMCS_GUEST_RIP    0x681e
+/* Natural-width guest state */
+#define VMCS_GUEST_CR0                   0x6800
+#define VMCS_GUEST_CR3                   0x6802
+#define VMCS_GUEST_CR4                   0x6804
+#define VMCS_GUEST_ES_BASE               0x6806
+#define VMCS_GUEST_CS_BASE               0x6808
+#define VMCS_GUEST_SS_BASE               0x680a
+#define VMCS_GUEST_DS_BASE               0x680c
+#define VMCS_GUEST_FS_BASE               0x680e
+#define VMCS_GUEST_GS_BASE               0x6810
+#define VMCS_GUEST_LDTR_BASE             0x6812
+#define VMCS_GUEST_TR_BASE               0x6814
+#define VMCS_GUEST_GDTR_BASE             0x6816
+#define VMCS_GUEST_IDTR_BASE             0x6818
+#define VMCS_GUEST_DR7                   0x681a
+#define VMCS_GUEST_RSP                   0x681c
+#define VMCS_GUEST_RIP                   0x681e
+#define VMCS_GUEST_RFLAGS                0x6820
+#define VMCS_GUEST_PENDING_DBG_EXCEPTION 0x6822
+#define VMCS_GUEST_IA32_SYSENTER_ESP     0x6824
+#define VMCS_GUEST_IA32_SYSENTER_EIP     0x6826
 
 /* VMCS host state */
 
@@ -95,7 +117,19 @@
 /* 32-bit host state */
 #define VMCS_HOST_IA32_SYSENTER_CS 0x4c00
 
-#define VMCS_HOST_RIP     0x6c16
+/* Natural-width host state */
+#define VMCS_HOST_CR0               0x6c00
+#define VMCS_HOST_CR3               0x6c02
+#define VMCS_HOST_CR4               0x6c04
+#define VMCS_HOST_FS_BASE           0x6c06
+#define VMCS_HOST_GS_BASE           0x6c08
+#define VMCS_HOST_TR_BASE           0x6c0a
+#define VMCS_HOST_GDTR_BASE         0x6c0c
+#define VMCS_HOST_IDTR_BASE         0x6c0e
+#define VMCS_HOST_IA32_SYSENTER_ESP 0x6c10
+#define VMCS_HOST_IA32_SYSENTER_EIP 0x6c12
+#define VMCS_HOST_RSP               0x6c14
+#define VMCS_HOST_RIP               0x6c16
 
 /* VMCS controls */
 

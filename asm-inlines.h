@@ -60,6 +60,26 @@ static inline u64 __rdmsr(u32 msr_num)
 #endif
 
 static inline u32
+__get_cr0(void)
+{
+        u64 cr0;
+        __asm__ __volatile__(
+                "movq %%cr0, %0"
+                :"=r"(cr0):);
+        return cr0;
+}
+
+static inline u32
+__get_cr3(void)
+{
+        u64 cr3;
+        __asm__ __volatile__(
+                "movq %%cr3, %0"
+                :"=r"(cr3):);
+        return cr3;
+}
+
+static inline u32
 __get_cr4(void)
 {
         u64 cr4;
