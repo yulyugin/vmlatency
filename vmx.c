@@ -180,8 +180,10 @@ do_vmclear(vm_monitor_t *vmm)
 static inline void
 initialize_vmcs(vm_monitor_t *vmm)
 {
-        /* 16-bit guest/host state */
         u16 val16;
+        u64 ia32_sysenter_cs;
+
+        /* 16-bit guest/host state */
         __asm__ __volatile__("movw %%es, %0" :"=r"(val16));
         __vmwrite(VMCS_GUEST_ES, val16);
         __vmwrite(VMCS_HOST_ES, val16);
@@ -238,6 +240,40 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_VMENTRY_INT_INFO, 0);
         __vmwrite(VMCS_VMENTRY_ECODE, 0);
         __vmwrite(VMCS_VMENTRY_INSTR_LEN, 0);
+
+        /* 32-bit guest state*/
+        __vmwrite(VMCS_GUEST_ES_LIMIT, 0xffffffff);
+        //__vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_CS_LIMIT, 0xffffffff);
+        //__vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_SS_LIMIT, 0xffffffff);
+        //__vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_DS_LIMIT, 0xffffffff);
+        //__vmwrite(VMCS_GUEST_DS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_FS_LIMIT, 0xffffffff);
+        //__vmwrite(VMCS_GUEST_FS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_GS_LIMIT, 0xffffffff);
+        //__vmwrite(VMCS_GUEST_GS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_LDTR_LIMIT, 0xffffffff);
+        //__vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_TR_LIMIT, 0xffffffff);
+        //__vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_GDTR_LIMIT, 0xffffffff);
+        __vmwrite(VMCS_GUEST_IDTR_LIMIT, 0xffffffff);
+
+        ia32_sysenter_cs = __rdmsr(IA32_SYSENTER_CS);
+        __vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, ia32_sysenter_cs);
+        __vmwrite(VMCS_HOST_IA32_SYSENTER_CS, ia32_sysenter_cs);
+
+        /* Natural-width control fields */
+        __vmwrite(VMCS_CR0_GUEST_HOST_MASK, 0);
+        __vmwrite(VMCS_CR0_READ_SHADOW, 0);
+        __vmwrite(VMCS_CR4_GUEST_HOST_MASK, 0);
+        __vmwrite(VMCS_CR4_READ_SHADOW, 0);
+        __vmwrite(VMCS_CR3_TARGET_VALUE_0, 0);
+        __vmwrite(VMCS_CR3_TARGET_VALUE_1, 0);
+        __vmwrite(VMCS_CR3_TARGET_VALUE_2, 0);
+        __vmwrite(VMCS_CR3_TARGET_VALUE_3, 0);
 }
 
 void
