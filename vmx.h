@@ -36,6 +36,16 @@ typedef struct vm_monitor {
         u32 procbased_allowed0;
         u32 procbased_allowed1;
 
+        u64 ia32_vmx_exit_ctls;
+        u64 ia32_vmx_true_exit_ctls;
+        u32 exit_ctls_allowed0;
+        u32 exit_ctls_allowed1;
+
+        u64 ia32_vmx_entry_ctls;
+        u64 ia32_vmx_true_entry_ctls;
+        u32 entry_ctls_allowed0;
+        u32 entry_ctls_allowed1;
+
         char *vmxon_region;
         uintptr_t vmxon_region_pa;
 

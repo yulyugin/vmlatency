@@ -225,16 +225,17 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_IA32_DEBUGCTL, 0);
 
         /* 32-bit control fields */
-        //__vmwrite(VMCS_PIN_BASED_VM_CTRL, );
-        //__vmwrite(VMCS_PROC_BASED_VM_CTRL, );
+        __vmwrite(VMCS_PIN_BASED_VM_CTLS, ~vmm->pinbased_allowed0);
+        /* Secondary controls are not activated */
+        __vmwrite(VMCS_PROC_BASED_VM_CTLS, ~vmm->procbased_allowed0);
         __vmwrite(VMCS_EXCEPTION_BITMAP, 0xffffffff);
         __vmwrite(VMCS_PF_ECODE_MASK, 0);
         __vmwrite(VMCS_PF_ECODE_MATCH, 0);
         __vmwrite(VMCS_CR3_TARGET_CNT, 0);
-        //__vmwrite(VMCS_VMEXIT_CRTL, );
+        __vmwrite(VMCS_VMEXIT_CTLS, ~vmm->exit_ctls_allowed0);
         __vmwrite(VMCS_VMEXIT_MSR_STORE_CNT, 0);
         __vmwrite(VMCS_VMEXIT_MSR_LOAD_CNT, 0);
-        //__vmwrite(VMCS_VMENTRY_CTRL, );
+        __vmwrite(VMCS_VMENTRY_CTLS, ~vmm->entry_ctls_allowed0);
         __vmwrite(VMCS_VMENTRY_MSR_LOAD_CNT, 0);
         __vmwrite(VMCS_VMENTRY_INT_INFO, 0);
         __vmwrite(VMCS_VMENTRY_ECODE, 0);
@@ -353,12 +354,46 @@ cache_vmx_capabilities(vm_monitor_t *vmm)
 
         vmm->ia32_vmx_pinbased_ctls = __rdmsr(IA32_VMX_PINBASED_CTLS);
         vmm->ia32_vmx_procbased_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS);
+        vmm->ia32_vmx_exit_ctls = __rdmsr(IA32_VMX_EXIT_CTLS);
+        vmm->ia32_vmx_entry_ctls = __rdmsr(IA32_VMX_ENTRY_CTLS);
 
         if (vmm->has_true_ctls) {
                 vmm->ia32_vmx_true_pinbased_ctls =
                         __rdmsr(IA32_VMX_TRUE_PINBASED_CTLS);
-                vmm->ia32_vmx_procbased_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS);
+                vmm->ia32_vmx_true_procbased_ctls =
+                        __rdmsr(IA32_VMX_PROCBASED_CTLS);
+                vmm->ia32_vmx_true_exit_ctls = __rdmsr(IA32_VMX_TRUE_EXIT_CTLS);
+                vmm->ia32_vmx_true_entry_ctls =
+                        __rdmsr(IA32_VMX_TRUE_ENTRY_CTLS);
         }
+
+        vmm->pinbased_allowed0 = 0xffffffff &
+                (vmm->has_true_ctls ? vmm->ia32_vmx_true_pinbased_ctls
+                                    : vmm->ia32_vmx_pinbased_ctls);
+        vmm->pinbased_allowed1 =
+                (vmm->has_true_ctls ? vmm->ia32_vmx_true_pinbased_ctls
+                                    : vmm->ia32_vmx_pinbased_ctls) >> 32;
+
+        vmm->procbased_allowed0 = 0xffffffff &
+                (vmm->has_true_ctls ? vmm->ia32_vmx_true_procbased_ctls
+                                    : vmm->ia32_vmx_procbased_ctls);
+        vmm->procbased_allowed1 =
+                (vmm->has_true_ctls ? vmm->ia32_vmx_true_procbased_ctls
+                                    : vmm->ia32_vmx_procbased_ctls) >> 32;
+
+        vmm->exit_ctls_allowed0 = 0xffffffff &
+                (vmm->has_true_ctls ? vmm->ia32_vmx_true_exit_ctls
+                                    : vmm->ia32_vmx_exit_ctls);
+        vmm->exit_ctls_allowed1 =
+                (vmm->has_true_ctls ? vmm->ia32_vmx_true_exit_ctls
+                                    : vmm->ia32_vmx_exit_ctls) >> 32;
+
+        vmm->entry_ctls_allowed0 = 0xffffffff &
+                (vmm->has_true_ctls ? vmm->ia32_vmx_true_entry_ctls
+                                    : vmm->ia32_vmx_entry_ctls);
+        vmm->entry_ctls_allowed1 =
+                (vmm->has_true_ctls ? vmm->ia32_vmx_true_entry_ctls
+                                    : vmm->ia32_vmx_entry_ctls) >> 32;
 }
 
 void
