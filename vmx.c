@@ -43,6 +43,7 @@ free_##name(vm_monitor_t *vmm)                                              \
 REGISTER_PAGE(vmxon_region)
 REGISTER_PAGE(io_bitmap_a)
 REGISTER_PAGE(io_bitmap_b)
+REGISTER_PAGE(msr_bitmap)
 REGISTER_PAGE(vmcs)
 
 int
@@ -64,6 +65,7 @@ allocate_memory(vm_monitor_t *vmm)
         if (allocate_vmcs(vmm) == 0) cnt++; else return -cnt;
         if (allocate_io_bitmap_a(vmm) == 0) cnt++; else return -cnt;
         if (allocate_io_bitmap_b(vmm) == 0) cnt++; else return -cnt;
+        if (allocate_msr_bitmap(vmm) == 0) cnt++; else return -cnt;
 
         return cnt;
 }
@@ -71,6 +73,7 @@ allocate_memory(vm_monitor_t *vmm)
 static inline void
 free_memory(vm_monitor_t *vmm, int cnt)
 {
+        if (cnt == 5) { free_msr_bitmap(vmm); cnt--; }
         if (cnt == 4) { free_io_bitmap_b(vmm); cnt--; }
         if (cnt == 3) { free_io_bitmap_a(vmm); cnt--; }
         if (cnt == 2) { free_vmxon_region(vmm); cnt--; }

@@ -57,6 +57,9 @@ typedef struct vm_monitor {
         char *io_bitmap_b;
         uintptr_t io_bitmap_b_pa;
 
+        char *msr_bitmap;
+        uintptr_t msr_bitmap_pa;
+
         u64 old_vmxe;
 } vm_monitor_t;
 
