@@ -20,6 +20,12 @@
 
 #include "types.h"
 
+typedef struct vmpage {
+        struct page *page;
+        char *p;
+        uintptr_t pa;
+} vmpage_t;
+
 typedef struct vm_monitor {
         /* Cached VMX capabilities */
         u64 ia32_vmx_basic;
@@ -46,19 +52,12 @@ typedef struct vm_monitor {
         u32 entry_ctls_allowed0;
         u32 entry_ctls_allowed1;
 
-        char *vmxon_region;
-        uintptr_t vmxon_region_pa;
+        vmpage_t vmxon_region;
+        vmpage_t vmcs;
 
-        char *vmcs;
-        uintptr_t vmcs_pa;
-
-        char *io_bitmap_a;
-        uintptr_t io_bitmap_a_pa;
-        char *io_bitmap_b;
-        uintptr_t io_bitmap_b_pa;
-
-        char *msr_bitmap;
-        uintptr_t msr_bitmap_pa;
+        vmpage_t io_bitmap_a;
+        vmpage_t io_bitmap_b;
+        vmpage_t msr_bitmap;
 
         u64 old_vmxe;
 } vm_monitor_t;

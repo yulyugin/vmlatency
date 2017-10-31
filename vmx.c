@@ -17,34 +17,34 @@
 
 #include <linux/printk.h>
 #include <linux/slab.h>
+#include <linux/highmem.h>
+#include <asm/io.h>
 
 #include "vmx.h"
 #include "asm-inlines.h"
 #include "cpu-defs.h"
 
-#define REGISTER_PAGE(name)                                                 \
-static inline int                                                           \
-allocate_##name(vm_monitor_t *vmm)                                          \
-{                                                                           \
-        if (((vmm)->name = kmalloc(0x1000, GFP_KERNEL)) == NULL) return -1; \
-        memset((vmm)->name, 0, 0x1000);                                     \
-        (vmm)->name##_pa = virt_to_phys((vmm)->name);                       \
-        return 0;                                                           \
-}                                                                           \
-                                                                            \
-static inline void                                                          \
-free_##name(vm_monitor_t *vmm)                                              \
-{                                                                           \
-        kfree(vmm->name);                                                   \
-        vmm->name = NULL;                                                   \
-        vmm->name##_pa = 0;                                                 \
+static inline int
+allocate_vmpage(vmpage_t *p)
+{
+        p->page = alloc_page(GFP_KERNEL | __GFP_ZERO);
+        if (!p->page)
+                return -1;
+
+        p->p = kmap(p->page);
+        p->pa = page_to_phys(p->page);
+        return 0;
 }
 
-REGISTER_PAGE(vmxon_region)
-REGISTER_PAGE(io_bitmap_a)
-REGISTER_PAGE(io_bitmap_b)
-REGISTER_PAGE(msr_bitmap)
-REGISTER_PAGE(vmcs)
+static inline void
+free_vmpage(vmpage_t *p)
+{
+        kunmap(p->page);
+        __free_page(p->page);
+        p->page = NULL;
+        p->p = NULL;
+        p->pa = 0;
+}
 
 int
 vmlatency_printk(const char *fmt, ...)
@@ -61,11 +61,11 @@ static inline int
 allocate_memory(vm_monitor_t *vmm)
 {
         int cnt = 0;
-        if (allocate_vmxon_region(vmm) == 0) cnt++; else return -cnt;
-        if (allocate_vmcs(vmm) == 0) cnt++; else return -cnt;
-        if (allocate_io_bitmap_a(vmm) == 0) cnt++; else return -cnt;
-        if (allocate_io_bitmap_b(vmm) == 0) cnt++; else return -cnt;
-        if (allocate_msr_bitmap(vmm) == 0) cnt++; else return -cnt;
+        if (allocate_vmpage(&vmm->vmxon_region) == 0) cnt++; else return -cnt;
+        if (allocate_vmpage(&vmm->vmcs) == 0) cnt++; else return -cnt;
+        if (allocate_vmpage(&vmm->io_bitmap_a) == 0) cnt++; else return -cnt;
+        if (allocate_vmpage(&vmm->io_bitmap_b) == 0) cnt++; else return -cnt;
+        if (allocate_vmpage(&vmm->msr_bitmap) == 0) cnt++; else return -cnt;
 
         return cnt;
 }
@@ -73,11 +73,11 @@ allocate_memory(vm_monitor_t *vmm)
 static inline void
 free_memory(vm_monitor_t *vmm, int cnt)
 {
-        if (cnt == 5) { free_msr_bitmap(vmm); cnt--; }
-        if (cnt == 4) { free_io_bitmap_b(vmm); cnt--; }
-        if (cnt == 3) { free_io_bitmap_a(vmm); cnt--; }
-        if (cnt == 2) { free_vmxon_region(vmm); cnt--; }
-        if (cnt == 1) { free_vmcs(vmm); cnt--; }
+        if (cnt == 5) { free_vmpage(&vmm->msr_bitmap); cnt--; }
+        if (cnt == 4) { free_vmpage(&vmm->io_bitmap_b); cnt--; }
+        if (cnt == 3) { free_vmpage(&vmm->io_bitmap_a); cnt--; }
+        if (cnt == 2) { free_vmpage(&vmm->vmxon_region); cnt--; }
+        if (cnt == 1) { free_vmpage(&vmm->vmcs); cnt--; }
 }
 
 static inline bool
@@ -116,13 +116,13 @@ get_vmcs_revision_identifier(void)
 static inline void
 vmxon_setup_revision_id(vm_monitor_t *vmm)
 {
-        ((u32 *)vmm->vmxon_region)[0] = get_vmcs_revision_identifier();
+        ((u32 *)vmm->vmxon_region.p)[0] = get_vmcs_revision_identifier();
 }
 
 static inline void
 vmcs_setup_revision_id(vm_monitor_t *vmm)
 {
-        ((u32 *)vmm->vmcs)[0] = get_vmcs_revision_identifier();
+        ((u32 *)vmm->vmcs.p)[0] = get_vmcs_revision_identifier();
 }
 
 static inline int
@@ -135,7 +135,7 @@ do_vmxon(vm_monitor_t *vmm)
         if (!vmm->old_vmxe)
                 __set_cr4(old_cr4 | CR4_VMXE);
 
-        if (__vmxon(vmm->vmxon_region_pa) != 0) {
+        if (__vmxon(vmm->vmxon_region.pa) != 0) {
                 vmlatency_printk("VMXON failed\n");
                 return -1;
         }
@@ -160,7 +160,7 @@ do_vmxoff(vm_monitor_t *vmm)
 static inline int
 do_vmptrld(vm_monitor_t *vmm)
 {
-        if (__vmptrld(vmm->vmcs_pa) != 0){
+        if (__vmptrld(vmm->vmcs.pa) != 0){
                 vmlatency_printk("VMPTRLD failed\n");
                 return -1;
         }
@@ -171,7 +171,7 @@ do_vmptrld(vm_monitor_t *vmm)
 static inline int
 do_vmclear(vm_monitor_t *vmm)
 {
-        if (__vmclear(vmm->vmcs_pa) != 0){
+        if (__vmclear(vmm->vmcs.pa) != 0){
                 vmlatency_printk("VMCLEAR failed\n");
                 return -1;
         }
@@ -248,8 +248,8 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_IDTR_LIMIT, 0xffffffff);
 
         /* 64-bit control fields */
-        __vmwrite(VMCS_IO_BITMAP_A_ADDR, vmm->io_bitmap_a_pa);
-        __vmwrite(VMCS_IO_BITMAP_B_ADDR, vmm->io_bitmap_b_pa);
+        __vmwrite(VMCS_IO_BITMAP_A_ADDR, vmm->io_bitmap_a.pa);
+        __vmwrite(VMCS_IO_BITMAP_B_ADDR, vmm->io_bitmap_b.pa);
         __vmwrite(VMCS_EXEC_VMCS_PTR, 0);
         __vmwrite(VMCS_TSC_OFFSET, 0);
 

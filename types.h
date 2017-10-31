@@ -20,7 +20,9 @@
 
 #include <linux/types.h>
 
+#ifndef __GNUC__
 typedef unsigned long long u64;
 typedef unsigned int u32;
+#endif
 
 #endif /* __TYPES_H__ */
