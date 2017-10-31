@@ -97,6 +97,14 @@ __set_cr4(u64 cr4)
                 ::"r"(cr4));
 }
 
+static inline u64
+__get_segment_ar(u64 seg)
+{
+        u64 attrs;
+        __asm__ __volatile__("lar %1, %0":"=r"(attrs):"r"(seg));
+        return (attrs >> 8) & 0xf0ff; /* Clear undefined bits */
+}
+
 static inline int
 __vmxon(uintptr_t vmxon_region_pa)
 {

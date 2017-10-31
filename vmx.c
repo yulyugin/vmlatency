@@ -198,14 +198,14 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_CS, val16);
         __vmwrite(VMCS_GUEST_CS_BASE, 0);
         __vmwrite(VMCS_GUEST_CS_LIMIT, 0xffffffff);
-        //__vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, __get_segment_ar(val16));
 
         __asm__ __volatile__("movw %%ss, %0" :"=r"(val16));
         __vmwrite(VMCS_HOST_SS, val16);
         __vmwrite(VMCS_GUEST_SS, val16);
         __vmwrite(VMCS_GUEST_SS_BASE, 0);
         __vmwrite(VMCS_GUEST_SS_LIMIT, 0xffffffff);
-        //__vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, __get_segment_ar(val16));
 
         __asm__ __volatile__("movw %%ds, %0" :"=r"(val16));
         __vmwrite(VMCS_HOST_DS, val16);
@@ -236,7 +236,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_TR, val16);
         __vmwrite(VMCS_HOST_TR, val16);
         __vmwrite(VMCS_GUEST_TR_LIMIT, 0xffffffff);
-        //__vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, __get_segment_ar(val16));
 
         __asm__ __volatile__("sldt %0" :"=r"(val16));
         __vmwrite(VMCS_GUEST_LDTR, val16);
@@ -244,8 +244,27 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_LDTR_LIMIT, 0xffffffff);
         //__vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, );
 
-        __vmwrite(VMCS_GUEST_GDTR_LIMIT, 0xffffffff);
-        __vmwrite(VMCS_GUEST_IDTR_LIMIT, 0xffffffff);
+        u64 gdtr;
+        __asm__ __volatile__("sgdt %0":"=m"(gdtr));
+        u64 gdtr_limit = gdtr & 0xffff;
+        u64 gdtr_base = gdtr >> 16;
+        /* Make GDTR.base canonical */
+        if (gdtr & 0x8000000000000000ull)
+                gdtr_base |= 0xffff000000000000ull;
+        __vmwrite(VMCS_GUEST_GDTR_LIMIT, gdtr_limit);
+        __vmwrite(VMCS_GUEST_GDTR_BASE, gdtr_base);
+        __vmwrite(VMCS_HOST_GDTR_BASE, gdtr_base);
+
+        u64 idtr;
+        __asm__ __volatile__("sidt %0":"=m"(idtr));
+        u64 idtr_limit = idtr & 0xffff;
+        u64 idtr_base = idtr >> 16;
+        /* Make IDTR.base canonical */
+        if (idtr & 0x8000000000000000ull)
+                idtr_base |= 0xffff000000000000ull;
+        __vmwrite(VMCS_GUEST_IDTR_LIMIT, idtr_limit);
+        __vmwrite(VMCS_GUEST_IDTR_BASE, idtr_base);
+        __vmwrite(VMCS_HOST_IDTR_BASE, idtr_base);
 
         /* 64-bit control fields */
         __vmwrite(VMCS_IO_BITMAP_A_ADDR, vmm->io_bitmap_a.pa);
