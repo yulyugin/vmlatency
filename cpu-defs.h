@@ -27,6 +27,9 @@
 #define IA32_SYSENTER_ESP            0x175
 #define IA32_SYSENTER_EIP            0x176
 
+#define IA32_FS_BASE                 0xc0000100
+#define IA32_GS_BASE                 0xc0000101
+
 #define IA32_VMX_BASIC               0x480
 #define IA32_VMX_PINBASED_CTLS       0x481
 #define IA32_VMX_PROCBASED_CTLS      0x482
