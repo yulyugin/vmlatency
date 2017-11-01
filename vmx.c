@@ -232,12 +232,6 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_GS_LIMIT, 0xffffffff);
         //__vmwrite(VMCS_GUEST_GS_ACCESS_RIGHTS, );
 
-        __asm__ __volatile__("str %0" :"=r"(val16));
-        __vmwrite(VMCS_GUEST_TR, val16);
-        __vmwrite(VMCS_HOST_TR, val16);
-        __vmwrite(VMCS_GUEST_TR_LIMIT, 0xffffffff);
-        __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, __get_segment_ar(val16));
-
         __asm__ __volatile__("sldt %0" :"=r"(val16));
         __vmwrite(VMCS_GUEST_LDTR, val16);
         __vmwrite(VMCS_GUEST_LDTR_BASE, 0);
@@ -265,6 +259,22 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_IDTR_LIMIT, idtr_limit);
         __vmwrite(VMCS_GUEST_IDTR_BASE, idtr_base);
         __vmwrite(VMCS_HOST_IDTR_BASE, idtr_base);
+
+        u16 tr, tr_limit;
+        __asm__ __volatile__("str %0" :"=r"(tr));
+        __asm__ __volatile__("lsl %1, %0":"=r"(tr_limit):"r"(tr));
+        __vmwrite(VMCS_GUEST_TR, tr);
+        __vmwrite(VMCS_HOST_TR, tr);
+        __vmwrite(VMCS_GUEST_TR_LIMIT, tr_limit);
+        __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, __get_segment_ar(val16));
+        /* Extracting TR.base for GDT */
+        u64 trdesc_lo = ((u64*)(gdtr_base + tr))[0];
+        u64 trbase = ((trdesc_lo >> 16) & 0xffffff)
+                   | (((trdesc_lo >> 56) & 0xff) << 24);
+        u64 trdesc_hi = ((u64*)(gdtr_base + tr))[1];
+        trbase |= trdesc_hi << 32;
+        __vmwrite(VMCS_GUEST_TR_BASE, trbase);
+        __vmwrite(VMCS_HOST_TR_BASE, trbase);
 
         /* 64-bit control fields */
         __vmwrite(VMCS_IO_BITMAP_A_ADDR, vmm->io_bitmap_a.pa);
