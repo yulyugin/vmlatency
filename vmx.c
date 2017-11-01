@@ -303,6 +303,10 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_VMENTRY_ECODE, 0);
         __vmwrite(VMCS_VMENTRY_INSTR_LEN, 0);
 
+        __vmwrite(VMCS_GUEST_INTERRUPTIBILITY_STATE, 0);
+        __vmwrite(VMCS_GUEST_ACTIVITY_STATE, 0);
+        __vmwrite(VMCS_GUEST_SMBASE, 0);
+
         /* 32-bit guest state*/
         u32 ia32_sysenter_cs = __rdmsr(IA32_SYSENTER_CS);
         __vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, ia32_sysenter_cs);
