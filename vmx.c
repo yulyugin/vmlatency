@@ -287,17 +287,21 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_IA32_DEBUGCTL, 0);
 
         /* 32-bit control fields */
-        __vmwrite(VMCS_PIN_BASED_VM_CTLS, ~vmm->pinbased_allowed0);
+        __vmwrite(VMCS_PIN_BASED_VM_CTLS, vmm->pinbased_allowed0 &
+                                          vmm->pinbased_allowed1);
         /* Secondary controls are not activated */
-        __vmwrite(VMCS_PROC_BASED_VM_CTLS, ~vmm->procbased_allowed0);
+        __vmwrite(VMCS_PROC_BASED_VM_CTLS, vmm->procbased_allowed0 &
+                                           vmm->procbased_allowed1);
         __vmwrite(VMCS_EXCEPTION_BITMAP, 0xffffffff);
         __vmwrite(VMCS_PF_ECODE_MASK, 0);
         __vmwrite(VMCS_PF_ECODE_MATCH, 0);
         __vmwrite(VMCS_CR3_TARGET_CNT, 0);
-        __vmwrite(VMCS_VMEXIT_CTLS, ~vmm->exit_ctls_allowed0);
+        __vmwrite(VMCS_VMEXIT_CTLS, vmm->exit_ctls_allowed0 &
+                                    vmm->exit_ctls_allowed1);
         __vmwrite(VMCS_VMEXIT_MSR_STORE_CNT, 0);
         __vmwrite(VMCS_VMEXIT_MSR_LOAD_CNT, 0);
-        __vmwrite(VMCS_VMENTRY_CTLS, ~vmm->entry_ctls_allowed0);
+        __vmwrite(VMCS_VMENTRY_CTLS, vmm->entry_ctls_allowed0 &
+                                     vmm->entry_ctls_allowed1);
         __vmwrite(VMCS_VMENTRY_MSR_LOAD_CNT, 0);
         __vmwrite(VMCS_VMENTRY_INT_INFO, 0);
         __vmwrite(VMCS_VMENTRY_ECODE, 0);
