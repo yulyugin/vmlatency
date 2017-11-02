@@ -341,11 +341,6 @@ initialize_vmcs(vm_monitor_t *vmm)
         /* Natural-width guest/host state */
         __vmwrite(VMCS_GUEST_DR7, 0x400); /* Initial value */
 
-        u64 rsp;
-        __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
-        __vmwrite(VMCS_GUEST_RSP, rsp);
-        __vmwrite(VMCS_HOST_RSP, rsp);
-
         u64 rflags;
         __asm__ __volatile__(SAVE_RFLAGS(rflags));
         __vmwrite(VMCS_GUEST_RFLAGS, rflags);
@@ -478,6 +473,11 @@ measure_vmlatency()
                 goto out3;
 
         initialize_vmcs(&vmm);
+
+        u64 rsp;
+        __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
+        __vmwrite(VMCS_GUEST_RSP, rsp);
+        __vmwrite(VMCS_HOST_RSP, rsp);
 
         __vmwrite(VMCS_HOST_RIP, (u64)&&handle_vmexit);
         __vmwrite(VMCS_GUEST_RIP, (u64)&&guest_code);
