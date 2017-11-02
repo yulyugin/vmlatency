@@ -266,4 +266,14 @@
 #define VMCS_CR3_TARGET_VALUE_2  0x600c
 #define VMCS_CR3_TARGET_VALUE_3  0x600e
 
+/* 32-bit read only data fields */
+#define VMCS_VM_INSTRUCTION_ERROR 0x4400
+#define VMCS_EXIT_REASON          0x4402
+#define VMCS_VM_EXIT_INT_INFO     0x4404
+#define VMCS_VM_EXIT_INT_ECODE    0x4406
+#define VMCS_IDT_VECTORING_INFO   0x4408
+#define VMCS_IDT_VECTORING_ECODE  0x440a
+#define VMCS_VM_EXIT_INSTR_LENGTH 0x440c
+#define VMCS_VM_EXIT_INSTR_INFO   0x440e
+
 #endif /* __CPU_DEFS_H__ */

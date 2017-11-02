@@ -176,4 +176,14 @@ __vmwrite(u64 field, u64 value)
                 ::"r"(field), "m"(value));
 }
 
+static inline u64
+__vmread(u64 field)
+{
+        u64 ret;
+        __asm__ __volatile__(
+                "vmread %1, %0"
+                :"=r"(ret): "r"(field));
+        return ret;
+}
+
 #endif /* __ASM_INLINES_H__ */

@@ -443,6 +443,13 @@ cache_vmx_capabilities(vm_monitor_t *vmm)
                                     : vmm->ia32_vmx_entry_ctls) >> 32;
 }
 
+static inline void
+handle_early_exit(void)
+{
+        vmlatency_printk("VM instruciton error: %#lx",
+                         __vmread(VMCS_VM_INSTRUCTION_ERROR));
+}
+
 void
 measure_vmlatency()
 {
@@ -472,6 +479,7 @@ measure_vmlatency()
 
         if (__vmlaunch() != 0) {
                 vmlatency_printk("VMLAUNCH failed\n");
+                handle_early_exit();
                 goto out4;
         }
 
