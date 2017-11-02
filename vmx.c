@@ -450,7 +450,7 @@ cache_vmx_capabilities(vm_monitor_t *vmm)
 static inline void
 handle_early_exit(void)
 {
-        vmlatency_printk("VM instruciton error: %#lx",
+        vmlatency_printk("VM instruciton error: %#lx\n",
                          __vmread(VMCS_VM_INSTRUCTION_ERROR));
 }
 
