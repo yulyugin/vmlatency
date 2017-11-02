@@ -296,8 +296,9 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_PF_ECODE_MASK, 0);
         __vmwrite(VMCS_PF_ECODE_MATCH, 0);
         __vmwrite(VMCS_CR3_TARGET_CNT, 0);
-        __vmwrite(VMCS_VMEXIT_CTLS, vmm->exit_ctls_allowed0 &
-                                    vmm->exit_ctls_allowed1);
+        __vmwrite(VMCS_VMEXIT_CTLS, (vmm->exit_ctls_allowed0 &
+                                     vmm->exit_ctls_allowed1) |
+                                    VMCS_VMEXIT_CTL_HOST_ADDR_SPACE_SIZE);
         __vmwrite(VMCS_VMEXIT_MSR_STORE_CNT, 0);
         __vmwrite(VMCS_VMEXIT_MSR_LOAD_CNT, 0);
         __vmwrite(VMCS_VMENTRY_CTLS, vmm->entry_ctls_allowed0 &
