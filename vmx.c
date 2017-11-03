@@ -179,6 +179,12 @@ do_vmclear(vm_monitor_t *vmm)
         return 0;
 }
 
+static u64
+get_segment_ar(u16 seg)
+{
+        return (__lar(seg) >> 0x8) & 0xf0ff; /* Clear undefined bits */
+}
+
 /* Initialize guest state to match host state */
 static inline void
 initialize_vmcs(vm_monitor_t *vmm)
@@ -198,14 +204,14 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_CS, val16);
         __vmwrite(VMCS_GUEST_CS_BASE, 0);
         __vmwrite(VMCS_GUEST_CS_LIMIT, 0xffffffff);
-        __vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, __get_segment_ar(val16));
+        __vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, get_segment_ar(val16));
 
         __asm__ __volatile__("movw %%ss, %0" :"=r"(val16));
         __vmwrite(VMCS_HOST_SS, val16);
         __vmwrite(VMCS_GUEST_SS, val16);
         __vmwrite(VMCS_GUEST_SS_BASE, 0);
         __vmwrite(VMCS_GUEST_SS_LIMIT, 0xffffffff);
-        __vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, __get_segment_ar(val16));
+        __vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, get_segment_ar(val16));
 
         __asm__ __volatile__("movw %%ds, %0" :"=r"(val16));
         __vmwrite(VMCS_HOST_DS, val16);
@@ -266,7 +272,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_TR, tr);
         __vmwrite(VMCS_HOST_TR, tr);
         __vmwrite(VMCS_GUEST_TR_LIMIT, tr_limit);
-        __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, __get_segment_ar(val16));
+        __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, get_segment_ar(val16));
         /* Extracting TR.base for GDT */
         u64 trdesc_lo = ((u64*)(gdtr_base + tr))[0];
         u64 trbase = ((trdesc_lo >> 16) & 0xffffff)

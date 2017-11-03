@@ -98,11 +98,11 @@ __set_cr4(u64 cr4)
 }
 
 static inline u64
-__get_segment_ar(u64 seg)
+__lar(u16 seg)
 {
         u64 attrs;
         __asm__ __volatile__("lar %1, %0":"=r"(attrs):"r"(seg));
-        return (attrs >> 8) & 0xf0ff; /* Clear undefined bits */
+        return attrs;
 }
 
 static inline int
