@@ -191,7 +191,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_ES, val16);
         __vmwrite(VMCS_GUEST_ES_BASE, 0);
         __vmwrite(VMCS_GUEST_ES_LIMIT, 0xffffffff);
-        //__vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS, UNUSABLE_AR);
 
         __asm__ __volatile__("movw %%cs, %0" :"=r"(val16));
         __vmwrite(VMCS_HOST_CS, val16);
@@ -212,7 +212,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_DS, val16);
         __vmwrite(VMCS_GUEST_DS_BASE, 0);
         __vmwrite(VMCS_GUEST_DS_LIMIT, 0xffffffff);
-        //__vmwrite(VMCS_GUEST_DS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_DS_ACCESS_RIGHTS, UNUSABLE_AR);
 
         __asm__ __volatile__("movw %%fs, %0" :"=r"(val16));
         __vmwrite(VMCS_HOST_FS, val16);
@@ -221,7 +221,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_FS_BASE, fs_base);
         __vmwrite(VMCS_HOST_FS_BASE, fs_base);
         __vmwrite(VMCS_GUEST_FS_LIMIT, 0xffffffff);
-        //__vmwrite(VMCS_GUEST_FS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_FS_ACCESS_RIGHTS, UNUSABLE_AR);
 
         __asm__ __volatile__("movw %%gs, %0" :"=r"(val16));
         __vmwrite(VMCS_HOST_GS, val16);
@@ -230,13 +230,13 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_GS_BASE, gs_base);
         __vmwrite(VMCS_HOST_GS_BASE, gs_base);
         __vmwrite(VMCS_GUEST_GS_LIMIT, 0xffffffff);
-        //__vmwrite(VMCS_GUEST_GS_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_GS_ACCESS_RIGHTS, UNUSABLE_AR);
 
         __asm__ __volatile__("sldt %0" :"=r"(val16));
         __vmwrite(VMCS_GUEST_LDTR, val16);
         __vmwrite(VMCS_GUEST_LDTR_BASE, 0);
         __vmwrite(VMCS_GUEST_LDTR_LIMIT, 0xffffffff);
-        //__vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, );
+        __vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, UNUSABLE_AR);
 
         u64 gdtr;
         __asm__ __volatile__("sgdt %0":"=m"(gdtr));

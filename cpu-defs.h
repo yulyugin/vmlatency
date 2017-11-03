@@ -20,6 +20,8 @@
 
 #define __BIT(n) (1ull << n)
 
+#define UNUSABLE_AR 0x10000
+
 /* MSR numbers */
 #define IA32_FEATURE_CONTROL         0x3a
 
