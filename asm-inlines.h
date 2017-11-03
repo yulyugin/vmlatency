@@ -59,7 +59,7 @@ static inline u64 __rdmsr(u32 msr_num)
 #include <asm/msr.h>
 #endif
 
-static inline u32
+static inline u64
 __get_cr0(void)
 {
         u64 cr0;
@@ -69,7 +69,7 @@ __get_cr0(void)
         return cr0;
 }
 
-static inline u32
+static inline u64
 __get_cr3(void)
 {
         u64 cr3;
@@ -79,7 +79,7 @@ __get_cr3(void)
         return cr3;
 }
 
-static inline u32
+static inline u64
 __get_cr4(void)
 {
         u64 cr4;

@@ -318,19 +318,19 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_HOST_IA32_SYSENTER_CS, ia32_sysenter_cs);
 
         /* Control registers */
-        u32 cr0 = __get_cr0();
+        u64 cr0 = __get_cr0();
         __vmwrite(VMCS_GUEST_CR0, cr0);
         __vmwrite(VMCS_HOST_CR0, cr0);
         __vmwrite(VMCS_CR0_GUEST_HOST_MASK, 0);
         __vmwrite(VMCS_CR0_READ_SHADOW, 0);
 
-        u32 cr4 = __get_cr4();
+        u64 cr4 = __get_cr4();
         __vmwrite(VMCS_GUEST_CR4, cr4);
         __vmwrite(VMCS_HOST_CR4, cr4);
         __vmwrite(VMCS_CR4_GUEST_HOST_MASK, 0);
         __vmwrite(VMCS_CR4_READ_SHADOW, 0);
 
-        u32 cr3 = __get_cr3();
+        u64 cr3 = __get_cr3();
         __vmwrite(VMCS_GUEST_CR3, cr3);
         __vmwrite(VMCS_HOST_CR3, cr3);
         __vmwrite(VMCS_CR3_TARGET_VALUE_0, 0);
