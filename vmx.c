@@ -307,8 +307,9 @@ initialize_vmcs(vm_monitor_t *vmm)
                                     VMCS_VMEXIT_CTL_HOST_ADDR_SPACE_SIZE);
         __vmwrite(VMCS_VMEXIT_MSR_STORE_CNT, 0);
         __vmwrite(VMCS_VMEXIT_MSR_LOAD_CNT, 0);
-        __vmwrite(VMCS_VMENTRY_CTLS, vmm->entry_ctls_allowed0 &
-                                     vmm->entry_ctls_allowed1);
+        __vmwrite(VMCS_VMENTRY_CTLS, (vmm->entry_ctls_allowed0 &
+                                      vmm->entry_ctls_allowed1) |
+                                     VMCS_VMENTRY_CTL_IA32E_MODE_GUEST);
         __vmwrite(VMCS_VMENTRY_MSR_LOAD_CNT, 0);
         __vmwrite(VMCS_VMENTRY_INT_INFO, 0);
         __vmwrite(VMCS_VMENTRY_ECODE, 0);
