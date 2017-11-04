@@ -278,4 +278,12 @@
 #define VMCS_VM_EXIT_INSTR_LENGTH 0x440c
 #define VMCS_VM_EXIT_INSTR_INFO   0x440e
 
+/* Natural width read only data fields */
+#define VMCS_EXIT_QUAL     0x6400
+#define VMCS_IO_RCX        0x6402
+#define VMCS_IO_RSI        0x6404
+#define VMCS_IO_RDI        0x6406
+#define VMCS_IO_RIP        0x6408
+#define VMCS_GUEST_LINADDR 0x640a
+
 #endif /* __CPU_DEFS_H__ */
