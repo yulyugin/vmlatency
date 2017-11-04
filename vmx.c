@@ -454,6 +454,19 @@ handle_early_exit(void)
                          __vmread(VMCS_VM_INSTRUCTION_ERROR));
 }
 
+static inline int
+handle_vmexit(void)
+{
+        u32 exit_reason = __vmread(VMCS_EXIT_REASON);
+        int basic_exit_reason = exit_reason & 0xffff;
+        if (basic_exit_reason != VMEXIT_CPUID) {
+                vmlatency_printk("Error: VM exit is not caused by CPUID."
+                                 "Basic exit reason %d\n", basic_exit_reason);
+                return -1;
+        }
+        return 0;
+}
+
 void
 measure_vmlatency()
 {
@@ -496,7 +509,7 @@ guest_code:
         __asm__ __volatile__("cpuid"); // Will cause VM exit
 
 handle_vmexit:
-        vmlatency_printk("VM exit handled\n");
+        handle_vmexit();
 
 out4:
         do_vmclear(&vmm);

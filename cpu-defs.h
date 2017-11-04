@@ -286,4 +286,6 @@
 #define VMCS_IO_RIP        0x6408
 #define VMCS_GUEST_LINADDR 0x640a
 
+#define VMEXIT_CPUID 10
+
 #endif /* __CPU_DEFS_H__ */
