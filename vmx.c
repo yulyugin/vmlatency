@@ -140,7 +140,6 @@ do_vmxon(vm_monitor_t *vmm)
                 return -1;
         }
 
-        vmlatency_printk("VMXON succeeded\n");
         return 0;
 }
 
@@ -153,8 +152,6 @@ do_vmxoff(vm_monitor_t *vmm)
         /* Clear CR4.VMXE if necessary */
         if (!vmm->old_vmxe)
                 __set_cr4(__get_cr4() & ~CR4_VMXE);
-
-        vmlatency_printk("VMXOFF succeeded\n");
 }
 
 static inline int
