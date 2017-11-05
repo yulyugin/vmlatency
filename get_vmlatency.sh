@@ -12,4 +12,4 @@ fi
 $SUDO /sbin/rmmod $VMLATENCY_DRIVER
 $SUDO /sbin/insmod $VMLATENCY_DRIVER
 
-dmesg |tail
+dmesg
