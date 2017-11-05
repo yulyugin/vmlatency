@@ -14,4 +14,6 @@ fi
 $SUDO /sbin/insmod $VMLATENCY_DRIVER
 $SUDO /sbin/rmmod $VMLATENCY_DRIVER
 
-dmesg | grep "\[vmlatency\]" | sed s/^"\[ "[0-9]*\.[0-9]*"\] \[vmlatency\] "// > results.txt
+cpu_name=`cat /proc/cpuinfo |grep "model name" |uniq |sed s/"^.*: "//`
+
+dmesg | grep "\[vmlatency\]" | sed s/^"\[ "[0-9]*\.[0-9]*"\] \[vmlatency\] "// > "$cpu_name".txt
