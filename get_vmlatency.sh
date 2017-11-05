@@ -9,7 +9,7 @@ if [ ! -z `id -u` ]; then
    SUDO="sudo"
 fi
 
-$SUDO /sbin/rmmod $VMLATENCY_DRIVER
 $SUDO /sbin/insmod $VMLATENCY_DRIVER
+$SUDO /sbin/rmmod $VMLATENCY_DRIVER
 
 dmesg
