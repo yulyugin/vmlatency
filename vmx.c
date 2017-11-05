@@ -359,8 +359,8 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_HOST_IA32_SYSENTER_EIP, ia32_sysenter_eip);
 }
 
-#define PRINT_VMXCAP_MSR(name) do {                              \
-        vmlatency_printk("%s (%#x): %#llx\n",                    \
+#define PRINT_VMXCAP_MSR(name) do {                   \
+        vmlatency_printk("%-30s (%#x): %#018llx\n",   \
                          #name, name, __rdmsr(name)); \
 } while (0)
 
