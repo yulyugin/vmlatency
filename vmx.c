@@ -47,7 +47,7 @@ free_vmpage(vmpage_t *p)
 }
 
 int
-vmlatency_printk(const char *fmt, ...)
+printm(const char *fmt, ...)
 {
         int ret;
         va_list va;
@@ -56,6 +56,8 @@ vmlatency_printk(const char *fmt, ...)
         va_end(va);
         return ret;
 }
+
+#define vmlatency_printk(...) printm("[vmlatency] " __VA_ARGS__)
 
 static inline int
 allocate_memory(vm_monitor_t *vmm)
@@ -547,7 +549,7 @@ measure_vmlatency()
                         __asm__ __volatile__("vmresume_exit:");
                 }
                 u64 end = __rdtscp();
-                vmlatency_printk("%8d - %lld\n", n, (end - start) / n);
+                vmlatency_printk("%6d - %lld\n", n, (end - start) / n);
         }
 
 out4:
