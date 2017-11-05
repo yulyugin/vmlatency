@@ -12,4 +12,4 @@ fi
 $SUDO /sbin/insmod $VMLATENCY_DRIVER
 $SUDO /sbin/rmmod $VMLATENCY_DRIVER
 
-dmesg
+dmesg | grep "\[vmlatency\]"
