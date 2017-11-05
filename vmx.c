@@ -376,9 +376,6 @@ print_vmx_info()
         }
         vmlatency_printk("%s", brand_string);
 
-        vmlatency_printk("VMCS revision identifier: %#lx\n",
-                         get_vmcs_revision_identifier());
-
         bool has_true_ctls = __rdmsr(IA32_VMX_BASIC) & __BIT(55);
 
         PRINT_VMXCAP_MSR(IA32_VMX_BASIC);
