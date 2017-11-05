@@ -499,7 +499,7 @@ measure_vmlatency()
         __asm__ __volatile__("movq $guest_code, %0":"=r"(guest_rip));
         __vmwrite(VMCS_GUEST_RIP, guest_rip);
         u64 host_rip;
-        __asm__ __volatile__("movq $handle_vmexit, %0":"=r"(host_rip));
+        __asm__ __volatile__("movq $vmlaunch_exit, %0":"=r"(host_rip));
         __vmwrite(VMCS_HOST_RIP, host_rip);
 
         if (__vmlaunch() != 0) {
@@ -513,7 +513,14 @@ measure_vmlatency()
 
         vmlatency_printk("Error: unreachable point.\n");
 
-        __asm__ __volatile__("handle_vmexit:");
+        __asm__ __volatile__("vmlaunch_exit:");
+        handle_vmexit();
+
+        __asm__ __volatile__("movq $vmresume_exit, %0":"=r"(host_rip));
+        __vmwrite(VMCS_HOST_RIP, host_rip);
+        __asm__ __volatile__("vmresume");
+
+        __asm__ __volatile__("vmresume_exit:");
         handle_vmexit();
 
 out4:
