@@ -18,7 +18,7 @@
 #ifndef __CPU_DEFS_H__
 #define __CPU_DEFS_H__
 
-#define __BIT(n) (1ull << n)
+#define __BIT(n) (1ull << (n))
 
 #define UNUSABLE_AR 0x10000
 
