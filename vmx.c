@@ -367,6 +367,15 @@ initialize_vmcs(vm_monitor_t *vmm)
 void
 print_vmx_info()
 {
+        char brand_string[48];
+        for (int i = 0; i < 3; i++) {
+                __cpuid_all(0x80000002 + i, 0, (u32*)&brand_string[0 + 16 * i],
+                            (u32*)&brand_string[4 + 16 * i],
+                            (u32*)&brand_string[8 + 16 * i],
+                            (u32*)&brand_string[12 + 16 * i]);
+        }
+        vmlatency_printk("%s", brand_string);
+
         vmlatency_printk("VMCS revision identifier: %#lx\n",
                          get_vmcs_revision_identifier());
 
