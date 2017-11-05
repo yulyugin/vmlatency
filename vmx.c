@@ -359,39 +359,54 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_HOST_IA32_SYSENTER_EIP, ia32_sysenter_eip);
 }
 
+#define PRINT_VMXCAP_MSR(name) do {                              \
+        vmlatency_printk("%s (%#x): %#llx\n",                    \
+                         #name, name, __rdmsr(name)); \
+} while (0)
+
 void
 print_vmx_info()
 {
         vmlatency_printk("VMCS revision identifier: %#lx\n",
                          get_vmcs_revision_identifier());
 
-        u64 ia32_vmx_basic = __rdmsr(IA32_VMX_BASIC);
-        vmlatency_printk("IA32_VMX_BASIC (%#x): %#llx\n", IA32_VMX_BASIC,
-                         ia32_vmx_basic);
-        bool has_true_ctls = ia32_vmx_basic & __BIT(55);
+        bool has_true_ctls = __rdmsr(IA32_VMX_BASIC) & __BIT(55);
 
-        u64 ia32_vmx_pinbased_ctls = __rdmsr(IA32_VMX_PINBASED_CTLS);
-        vmlatency_printk("IA32_VMX_PINBASED_CTLS (%#x): %#llx\n",
-                         IA32_VMX_PINBASED_CTLS, ia32_vmx_pinbased_ctls);
+        PRINT_VMXCAP_MSR(IA32_VMX_BASIC);
+        PRINT_VMXCAP_MSR(IA32_VMX_PINBASED_CTLS);
+        PRINT_VMXCAP_MSR(IA32_VMX_PROCBASED_CTLS);
+        PRINT_VMXCAP_MSR(IA32_VMX_EXIT_CTLS);
+        PRINT_VMXCAP_MSR(IA32_VMX_ENTRY_CTLS);
+        PRINT_VMXCAP_MSR(IA32_VMX_MSR_MISC);
+        PRINT_VMXCAP_MSR(IA32_VMX_CR0_FIXED0);
+        PRINT_VMXCAP_MSR(IA32_VMX_CR0_FIXED1);
+        PRINT_VMXCAP_MSR(IA32_VMX_CR4_FIXED0);
+        PRINT_VMXCAP_MSR(IA32_VMX_CR4_FIXED1);
+        PRINT_VMXCAP_MSR(IA32_VMX_VMCS_ENUM);
 
-        if (has_true_ctls) {
-                u64 ia32_vmx_true_pinbased_ctls =
-                        __rdmsr(IA32_VMX_TRUE_PINBASED_CTLS);
-                vmlatency_printk("IA32_VMX_TRUE_PINBASED_CTLS (%#x): %#llx\n",
-                                 IA32_VMX_TRUE_PINBASED_CTLS,
-                                 ia32_vmx_true_pinbased_ctls);
+        bool has_secondary_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS)
+                                & (VMX_PROC_CTL_ACTIVATE_SECONDARY_CTLS << 32);
+
+        if (has_secondary_ctls) {
+                PRINT_VMXCAP_MSR(IA32_VMX_PROCBASED_CTLS2);
+                bool has_ept = __rdmsr(IA32_VMX_PROCBASED_CTLS2)
+                             & (VMX_PROC_CTL2_ENABLE_EPT << 32);
+                if (has_ept)
+                        PRINT_VMXCAP_MSR(IA32_VMX_EPT_VPID_CAP);
         }
 
-        u64 ia32_vmx_procbased_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS);
-        vmlatency_printk("IA32_VMX_PROCBASED_CTLS (%#x): %#llx\n",
-                         IA32_VMX_PROCBASED_CTLS, ia32_vmx_procbased_ctls);
-
         if (has_true_ctls) {
-                u64 ia32_vmx_true_procbased_ctls =
-                        __rdmsr(IA32_VMX_TRUE_PROCBASED_CTLS);
-                vmlatency_printk("IA32_VMX_TRUE_PROCBASED_CTLS (%#x): %#llx\n",
-                                 IA32_VMX_TRUE_PROCBASED_CTLS,
-                                 ia32_vmx_true_procbased_ctls);
+                PRINT_VMXCAP_MSR(IA32_VMX_TRUE_PINBASED_CTLS);
+                PRINT_VMXCAP_MSR(IA32_VMX_TRUE_PROCBASED_CTLS);
+                PRINT_VMXCAP_MSR(IA32_VMX_TRUE_EXIT_CTLS);
+                PRINT_VMXCAP_MSR(IA32_VMX_TRUE_ENTRY_CTLS);
+        }
+
+        if (has_secondary_ctls) {
+                bool has_vmfunc = __rdmsr(IA32_VMX_PROCBASED_CTLS2)
+                                & (VMX_PROC_CTL2_ENABLE_VMFUNC << 32);
+                if (has_vmfunc)
+                        PRINT_VMXCAP_MSR(IA32_VMX_VMFUNC);
         }
 }
 
