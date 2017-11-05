@@ -103,7 +103,6 @@ vmx_enabled()
                 return false;
         }
 
-        vmlatency_printk("VMX is supported by CPU\n");
         return true;
 }
 
