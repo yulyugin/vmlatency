@@ -460,7 +460,7 @@ handle_vmexit(void)
         int basic_exit_reason = exit_reason & 0xffff;
         if (basic_exit_reason != VMEXIT_CPUID) {
                 vmlatency_printk("Error: VM exit is not caused by CPUID."
-                                 "Basic exit reason %d\n", basic_exit_reason);
+                                 " Basic exit reason %d\n", basic_exit_reason);
                 return -1;
         }
         return 0;
@@ -495,8 +495,12 @@ measure_vmlatency()
         __vmwrite(VMCS_GUEST_RSP, rsp);
         __vmwrite(VMCS_HOST_RSP, rsp);
 
-        __vmwrite(VMCS_HOST_RIP, (u64)&&handle_vmexit);
-        __vmwrite(VMCS_GUEST_RIP, (u64)&&guest_code);
+        u64 guest_rip;
+        __asm__ __volatile__("movq $guest_code, %0":"=r"(guest_rip));
+        __vmwrite(VMCS_GUEST_RIP, guest_rip);
+        u64 host_rip;
+        __asm__ __volatile__("movq $handle_vmexit, %0":"=r"(host_rip));
+        __vmwrite(VMCS_HOST_RIP, host_rip);
 
         if (__vmlaunch() != 0) {
                 vmlatency_printk("VMLAUNCH failed\n");
@@ -504,10 +508,12 @@ measure_vmlatency()
                 goto out4;
         }
 
-guest_code:
+        __asm__ __volatile__("guest_code:");
         __asm__ __volatile__("cpuid"); // Will cause VM exit
 
-handle_vmexit:
+        vmlatency_printk("Error: unreachable point.\n");
+
+        __asm__ __volatile__("handle_vmexit:");
         handle_vmexit();
 
 out4:
