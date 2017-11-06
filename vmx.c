@@ -16,7 +16,7 @@
 */
 
 #include <linux/slab.h>
-#include <linux/printk.h>
+#include <linux/types.h>
 #include <linux/highmem.h>
 #include <asm/io.h>
 
