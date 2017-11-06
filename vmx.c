@@ -376,7 +376,7 @@ print_vmx_info()
                             (u32*)&brand_string[8 + 16 * i],
                             (u32*)&brand_string[12 + 16 * i]);
         }
-        vmlatency_printk("%s", brand_string);
+        vmlatency_printk("%s\n", brand_string);
 
         bool has_true_ctls = __rdmsr(IA32_VMX_BASIC) & __BIT(55);
 
