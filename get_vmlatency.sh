@@ -1,5 +1,6 @@
 #!/bin/sh
 
+make clean
 make
 
 VMLATENCY_DRIVER="vmlatency.ko"
