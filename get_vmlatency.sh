@@ -11,10 +11,8 @@ if [ ! -z `id -u` ]; then
    SUDO="sudo"
 fi
 
-for i in {1..10}; do
-    $SUDO /sbin/insmod $VMLATENCY_DRIVER
-    $SUDO /sbin/rmmod $VMLATENCY_DRIVER
-done
+$SUDO /sbin/insmod $VMLATENCY_DRIVER
+$SUDO /sbin/rmmod $VMLATENCY_DRIVER
 
 cpu_name=`cat /proc/cpuinfo |grep "model name" |uniq |sed s/"^.*: "//`
 
