@@ -15,8 +15,8 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
-#include <linux/printk.h>
 #include <linux/slab.h>
+#include <linux/printk.h>
 #include <linux/highmem.h>
 #include <asm/io.h>
 
