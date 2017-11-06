@@ -493,6 +493,7 @@ measure_vmlatency()
         vmcs_setup_revision_id(&vmm);
 
         /* Disable interrupts */
+        get_cpu();
         unsigned long irq_flags;
         local_irq_save(irq_flags);
 
@@ -550,6 +551,7 @@ out3:
 out2:
         /* Enable interrupts */
         local_irq_restore(irq_flags);
+        put_cpu();
 out1:
         free_memory(&vmm, cnt);
 }
