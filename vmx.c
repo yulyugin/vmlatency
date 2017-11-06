@@ -242,27 +242,17 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_LDTR_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, UNUSABLE_AR);
 
-        u64 gdtr;
+        descriptor_t gdtr;
         __asm__ __volatile__("sgdt %0":"=m"(gdtr));
-        u64 gdtr_limit = gdtr & 0xffff;
-        u64 gdtr_base = gdtr >> 16;
-        /* Make GDTR.base canonical */
-        if (gdtr & 0x8000000000000000ull)
-                gdtr_base |= 0xffff000000000000ull;
-        __vmwrite(VMCS_GUEST_GDTR_LIMIT, gdtr_limit);
-        __vmwrite(VMCS_GUEST_GDTR_BASE, gdtr_base);
-        __vmwrite(VMCS_HOST_GDTR_BASE, gdtr_base);
+        __vmwrite(VMCS_GUEST_GDTR_LIMIT, gdtr.limit);
+        __vmwrite(VMCS_GUEST_GDTR_BASE, gdtr.base);
+        __vmwrite(VMCS_HOST_GDTR_BASE, gdtr.base);
 
-        u64 idtr;
+        descriptor_t idtr;
         __asm__ __volatile__("sidt %0":"=m"(idtr));
-        u64 idtr_limit = idtr & 0xffff;
-        u64 idtr_base = idtr >> 16;
-        /* Make IDTR.base canonical */
-        if (idtr & 0x8000000000000000ull)
-                idtr_base |= 0xffff000000000000ull;
-        __vmwrite(VMCS_GUEST_IDTR_LIMIT, idtr_limit);
-        __vmwrite(VMCS_GUEST_IDTR_BASE, idtr_base);
-        __vmwrite(VMCS_HOST_IDTR_BASE, idtr_base);
+        __vmwrite(VMCS_GUEST_IDTR_LIMIT, idtr.limit);
+        __vmwrite(VMCS_GUEST_IDTR_BASE, idtr.base);
+        __vmwrite(VMCS_HOST_IDTR_BASE, idtr.base);
 
         u16 tr, tr_limit;
         __asm__ __volatile__("str %0" :"=r"(tr));
@@ -272,10 +262,10 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_TR_LIMIT, tr_limit);
         __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, get_segment_ar(tr));
         /* Extracting TR.base for GDT */
-        u64 trdesc_lo = ((u64*)(gdtr_base + tr))[0];
+        u64 trdesc_lo = ((u64*)(gdtr.base + tr))[0];
         u64 trbase = ((trdesc_lo >> 16) & 0xffffff)
                    | (((trdesc_lo >> 56) & 0xff) << 24);
-        u64 trdesc_hi = ((u64*)(gdtr_base + tr))[1];
+        u64 trdesc_hi = ((u64*)(gdtr.base + tr))[1];
         trbase |= trdesc_hi << 32;
         __vmwrite(VMCS_GUEST_TR_BASE, trbase);
         __vmwrite(VMCS_HOST_TR_BASE, trbase);

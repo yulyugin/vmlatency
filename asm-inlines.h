@@ -23,6 +23,13 @@
 
 #include <linux/version.h>
 
+#pragma pack(push, 1)
+typedef struct {
+        u16 limit;
+        u64 base;
+} descriptor_t;
+#pragma pack(pop)
+
 #define SAVE_RFLAGS(rflags) \
         "pushfq;"           \
         "popq %0;"          \
