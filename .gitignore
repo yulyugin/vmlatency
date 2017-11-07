@@ -4,6 +4,7 @@
 # Object files
 *.o
 *.ko
+*.ko.unsigned
 *.obj
 *.elf
 
