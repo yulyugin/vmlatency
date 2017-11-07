@@ -60,6 +60,7 @@ typedef struct vm_monitor {
         vmpage_t msr_bitmap;
 
         u64 old_vmxe;
+        bool our_vmxon;
 } vm_monitor_t;
 
 int vmlatency_printk(const char *fmt, ...);

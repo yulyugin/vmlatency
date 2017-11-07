@@ -126,7 +126,7 @@ vmcs_setup_revision_id(vm_monitor_t *vmm)
         ((u32 *)vmm->vmcs.p)[0] = get_vmcs_revision_identifier();
 }
 
-static inline int
+static inline void
 do_vmxon(vm_monitor_t *vmm)
 {
         u64 old_cr4 = __get_cr4();
@@ -136,18 +136,14 @@ do_vmxon(vm_monitor_t *vmm)
         if (!vmm->old_vmxe)
                 __set_cr4(old_cr4 | CR4_VMXE);
 
-        if (__vmxon(vmm->vmxon_region.pa) != 0) {
-                vmlatency_printk("VMXON failed\n");
-                return -1;
-        }
-
-        return 0;
+        if (__vmxon(vmm->vmxon_region.pa) == 0)
+                vmm->our_vmxon = true;
 }
 
 static inline void
 do_vmxoff(vm_monitor_t *vmm)
 {
-        if (__vmxoff() != 0)
+        if (vmm->our_vmxon && (__vmxoff() != 0))
                 vmlatency_printk("VMXOFF failed\n");
 
         /* Clear CR4.VMXE if necessary */
@@ -497,11 +493,9 @@ measure_vmlatency()
         unsigned long irq_flags;
         local_irq_save(irq_flags);
 
-        if (do_vmxon(&vmm) != 0)
-                goto out2;
-
+        do_vmxon(&vmm);
         if (do_vmptrld(&vmm) != 0)
-                goto out3;
+                goto out2;
 
         initialize_vmcs(&vmm);
 
@@ -520,7 +514,7 @@ measure_vmlatency()
         if (__vmlaunch() != 0) {
                 vmlatency_printk("VMLAUNCH failed\n");
                 handle_early_exit();
-                goto out4;
+                goto out3;
         }
 
         __asm__ __volatile__("guest_code:");
@@ -544,11 +538,11 @@ measure_vmlatency()
                 vmlatency_printk("%6d - %lld\n", n, (end - start) / n);
         }
 
-out4:
-        do_vmclear(&vmm);
 out3:
-        do_vmxoff(&vmm);
+        do_vmclear(&vmm);
 out2:
+        do_vmxoff(&vmm);
+
         /* Enable interrupts */
         local_irq_restore(irq_flags);
         put_cpu();
