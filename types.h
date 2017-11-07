@@ -19,6 +19,11 @@
 #define __TYPES_H__
 
 #include <linux/types.h>
+#include <linux/version.h>
+
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,24)
+typedef __SIZE_TYPE__ uintptr_t;
+#endif
 
 #ifndef __GNUC__
 typedef unsigned long long u64;
