@@ -25,4 +25,10 @@
 typedef __SIZE_TYPE__ uintptr_t;
 #endif
 
+#if LINUX_VERSION_CODE < KERNEL_VERSION(2,6,19) && !defined(HAS_BOOL)
+typedef _Bool bool;
+#define true 1
+#define false 0
+#endif
+
 #endif /* __TYPES_H__ */
