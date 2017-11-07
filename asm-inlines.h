@@ -104,11 +104,11 @@ __set_cr4(u64 cr4)
                 ::"r"(cr4));
 }
 
-static inline u64
+static inline u32
 __lar(u16 seg)
 {
-        u64 attrs;
-        __asm__ __volatile__("lar %1, %0":"=r"(attrs):"r"(seg));
+        u32 attrs;
+        __asm__ __volatile__("lar %1, %0":"=r"(attrs):"r"((u32)seg));
         return attrs;
 }
 
