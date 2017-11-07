@@ -194,12 +194,12 @@ __vmread(u64 field)
 }
 
 static inline u64
-__rdtscp(void)
+__rdtsc(void)
 {
         u32 eax, edx;
         __asm__ __volatile__(
-                "rdtscp"
-                :"=a"(eax), "=d"(edx)::"ecx");
+                "rdtsc"
+                :"=a"(eax), "=d"(edx));
         return ((u64)edx << 32) | eax;
 }
 
