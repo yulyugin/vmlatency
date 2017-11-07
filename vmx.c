@@ -534,14 +534,14 @@ measure_vmlatency()
         __asm__ __volatile__("movq $vmresume_exit, %0":"=r"(host_rip));
         __vmwrite(VMCS_HOST_RIP, host_rip);
 
-        for (int n = 1; n < __BIT(25); n *= 2) {
+        for (int n = 1; n < __BIT(20); n *= 2) {
                 u64 start = __rdtscp();
                 for (int i = 0; i < n; i++) {
                         __asm__ __volatile__("vmresume");
                         __asm__ __volatile__("vmresume_exit:");
                 }
                 u64 end = __rdtscp();
-                vmlatency_printk("%8d - %lld\n", n, (end - start) / n);
+                vmlatency_printk("%6d - %lld\n", n, (end - start) / n);
         }
 
 out4:
