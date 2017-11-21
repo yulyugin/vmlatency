@@ -3,6 +3,10 @@ Simple code to demonstrate how one can use Intel(R) VT-x technology to setup Vir
 
 The tool also measures VM-Entry and VM-Exit turnaroound time in cycles. RDTSC instruction is used to do the measurements.
 
+## Results
+
+![VMlatency](/results/vmlatency.png)
+
 ## Requirements
 1. gcc
 2. kernel headers
