@@ -52,3 +52,9 @@ Module.symvers
 Module.markers
 Mkfile.old
 dkms.conf
+
+# Windows build artifacts
+*.log
+objfre_win7_amd64
+*.err
+build-win7-fre
