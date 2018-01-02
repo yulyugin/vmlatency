@@ -18,6 +18,7 @@
 #ifndef __TYPES_H__
 #define __TYPES_H__
 
+#ifdef __linux__
 #include <linux/types.h>
 #include <linux/version.h>
 
@@ -29,6 +30,16 @@ typedef __SIZE_TYPE__ uintptr_t;
 typedef _Bool bool;
 #define true 1
 #define false 0
+#endif
+
+#else // ndef __linux__
+typedef BOOLEAN bool;
+#define true TRUE
+#define false FALSE
+
+typedef unsigned __int16 u16;
+typedef unsigned __int32 u32;
+typedef unsigned __int64 u64;
 #endif
 
 #endif /* __TYPES_H__ */
