@@ -3,7 +3,7 @@
 make clean
 make
 
-VMLATENCY_DRIVER="vmlatency.ko"
+VMLATENCY_DRIVER=build-vmlatency-`uname -r`/vmlatency.ko
 
 [ -e $VMLATENCY_DRIVER ] || { echo "$VMLATENCY_DRIVER does not exist" ; exit 1 ; }
 
