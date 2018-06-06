@@ -186,35 +186,35 @@ initialize_vmcs(vm_monitor_t *vmm)
         u16 val16;
 
         /* Segment registers */
-        __asm__ __volatile__("movw %%es, %0" :"=r"(val16));
+        val16 = __get_es();
         __vmwrite(VMCS_HOST_ES, val16);
         __vmwrite(VMCS_GUEST_ES, val16);
         __vmwrite(VMCS_GUEST_ES_BASE, 0);
         __vmwrite(VMCS_GUEST_ES_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS, UNUSABLE_AR);
 
-        __asm__ __volatile__("movw %%cs, %0" :"=r"(val16));
+        val16 = __get_cs();
         __vmwrite(VMCS_HOST_CS, val16);
         __vmwrite(VMCS_GUEST_CS, val16);
         __vmwrite(VMCS_GUEST_CS_BASE, 0);
         __vmwrite(VMCS_GUEST_CS_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, get_segment_ar(val16));
 
-        __asm__ __volatile__("movw %%ss, %0" :"=r"(val16));
+        val16 = __get_ss();
         __vmwrite(VMCS_HOST_SS, val16);
         __vmwrite(VMCS_GUEST_SS, val16);
         __vmwrite(VMCS_GUEST_SS_BASE, 0);
         __vmwrite(VMCS_GUEST_SS_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, get_segment_ar(val16));
 
-        __asm__ __volatile__("movw %%ds, %0" :"=r"(val16));
+        val16 = __get_ds();
         __vmwrite(VMCS_HOST_DS, val16);
         __vmwrite(VMCS_GUEST_DS, val16);
         __vmwrite(VMCS_GUEST_DS_BASE, 0);
         __vmwrite(VMCS_GUEST_DS_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_DS_ACCESS_RIGHTS, UNUSABLE_AR);
 
-        __asm__ __volatile__("movw %%fs, %0" :"=r"(val16));
+        val16 = __get_fs();
         __vmwrite(VMCS_HOST_FS, val16);
         __vmwrite(VMCS_GUEST_FS, val16);
         u64 fs_base = __rdmsr(IA32_FS_BASE);
@@ -223,7 +223,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_FS_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_FS_ACCESS_RIGHTS, UNUSABLE_AR);
 
-        __asm__ __volatile__("movw %%gs, %0" :"=r"(val16));
+        val16 = __get_gs();
         __vmwrite(VMCS_HOST_GS, val16);
         __vmwrite(VMCS_GUEST_GS, val16);
         u64 gs_base = __rdmsr(IA32_GS_BASE);
@@ -232,27 +232,24 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_GS_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_GS_ACCESS_RIGHTS, UNUSABLE_AR);
 
-        __asm__ __volatile__("sldt %0" :"=r"(val16));
+        val16 = __sldt();
         __vmwrite(VMCS_GUEST_LDTR, val16);
         __vmwrite(VMCS_GUEST_LDTR_BASE, 0);
         __vmwrite(VMCS_GUEST_LDTR_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, UNUSABLE_AR);
 
-        descriptor_t gdtr;
-        __asm__ __volatile__("sgdt %0":"=m"(gdtr));
+        descriptor_t gdtr = __sgdt();
         __vmwrite(VMCS_GUEST_GDTR_LIMIT, gdtr.limit);
         __vmwrite(VMCS_GUEST_GDTR_BASE, gdtr.base);
         __vmwrite(VMCS_HOST_GDTR_BASE, gdtr.base);
 
-        descriptor_t idtr;
-        __asm__ __volatile__("sidt %0":"=m"(idtr));
+        descriptor_t idtr = __sidt();
         __vmwrite(VMCS_GUEST_IDTR_LIMIT, idtr.limit);
         __vmwrite(VMCS_GUEST_IDTR_BASE, idtr.base);
         __vmwrite(VMCS_HOST_IDTR_BASE, idtr.base);
 
-        u16 tr, tr_limit;
-        __asm__ __volatile__("str %0" :"=r"(tr));
-        __asm__ __volatile__("lsl %1, %0":"=r"(tr_limit):"r"(tr));
+        u16 tr = __str();
+        u16 tr_limit = __lsl(tr);
         __vmwrite(VMCS_GUEST_TR, tr);
         __vmwrite(VMCS_HOST_TR, tr);
         __vmwrite(VMCS_GUEST_TR_LIMIT, tr_limit);

@@ -104,12 +104,100 @@ __set_cr4(u64 cr4)
                 ::"r"(cr4));
 }
 
+static inline u16
+__get_es(void)
+{
+        u16 es;
+        __asm__ __volatile__("movw %%es, %0" :"=r"(es));
+        return es;
+}
+
+static inline u16
+__get_cs(void)
+{
+        u16 cs;
+        __asm__ __volatile__("movw %%cs, %0" :"=r"(cs));
+        return cs;
+}
+
+static inline u16
+__get_ss(void)
+{
+        u16 ss;
+        __asm__ __volatile__("movw %%ss, %0" :"=r"(ss));
+        return ss;
+}
+
+static inline u16
+__get_ds(void)
+{
+        u16 ds;
+        __asm__ __volatile__("movw %%ds, %0" :"=r"(ds));
+        return ds;
+}
+
+static inline u16
+__get_fs(void)
+{
+        u16 fs;
+        __asm__ __volatile__("movw %%fs, %0" :"=r"(fs));
+        return fs;
+}
+
+static inline u16
+__get_gs(void)
+{
+        u16 gs;
+        __asm__ __volatile__("movw %%gs, %0" :"=r"(gs));
+        return gs;
+}
+
 static inline u32
 __lar(u16 seg)
 {
         u32 attrs;
         __asm__ __volatile__("lar %1, %0":"=r"(attrs):"r"((u32)seg));
         return attrs;
+}
+
+static inline u16
+__lsl(u16 seg)
+{
+        u16 limit;
+        __asm__ __volatile__("lsl %1, %0":"=r"(limit):"r"(seg));
+        return limit;
+}
+
+static inline u16
+__sldt(void)
+{
+        u16 ldtr;
+        __asm__ __volatile__("sldt %0" :"=r"(ldtr));
+        return ldtr;
+}
+
+static inline descriptor_t
+__sgdt(void)
+{
+        descriptor_t gdtr;
+        __asm__ __volatile__("sgdt %0":"=m"(gdtr));
+        return gdtr;
+}
+
+static inline descriptor_t
+__sidt(void)
+{
+        descriptor_t idtr;
+        __asm__ __volatile__("sidt %0":"=m"(idtr));
+        return idtr;
+}
+
+static inline u16
+__str(void)
+{
+        u16 tr;
+        __asm__ __volatile__("str %0" :"=r"(tr));
+        return tr;
 }
 
 static inline int
