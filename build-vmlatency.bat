@@ -3,8 +3,9 @@
 IF NOT EXIST C:\WinDDK\7600.16385.1 GOTO UNKNOWN_WDK
 
 CALL C:\WinDDK\7600.16385.1\bin\setenv.bat C:\WinDDK\7600.16385.1\ fre x64 WIN7 2>&1 > NUL
-CD /d %~dp0
+CD /d %~dp0/vmm
 build /F /w /c
+CD /d %~dp0
 
 GOTO EXIT
 
