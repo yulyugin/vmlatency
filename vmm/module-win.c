@@ -22,7 +22,6 @@
 #define NT_DEVICE_NAME  L"\\Device\\VMLATENCY"
 
 DRIVER_INITIALIZE DriverEntry;
-DRIVER_DISPATCH VmlatencyCreateClose;
 DRIVER_UNLOAD VmlatencyUnloadDriver;
 
 #ifdef ALLOC_PRAGMA
@@ -59,19 +58,9 @@ DriverEntry(__in PDRIVER_OBJECT DriverObject,
                 return ntStatus;
         }
 
-        DriverObject->MajorFunction[IRP_MJ_CREATE] = VmlatencyCreateClose;
-        DriverObject->MajorFunction[IRP_MJ_CLOSE] = VmlatencyCreateClose;
         DriverObject->DriverUnload = VmlatencyUnloadDriver;
 
         return ntStatus;
-}
-
-NTSTATUS
-VmlatencyCreateClose(PDEVICE_OBJECT DeviceObject, PIRP Irp) {
-        Irp->IoStatus.Status = STATUS_SUCCESS;
-        Irp->IoStatus.Information = 0;
-        IoCompleteRequest(Irp, IO_NO_INCREMENT);
-        return STATUS_SUCCESS;
 }
 
 VOID
