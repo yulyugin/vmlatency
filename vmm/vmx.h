@@ -19,12 +19,7 @@
 #define __VMX_H__
 
 #include "types.h"
-
-typedef struct vmpage {
-        struct page *page;
-        char *p;
-        uintptr_t pa;
-} vmpage_t;
+#include "api.h"
 
 typedef struct vm_monitor {
         /* Cached VMX capabilities */
@@ -62,8 +57,6 @@ typedef struct vm_monitor {
         u64 old_vmxe;
         bool our_vmxon;
 } vm_monitor_t;
-
-int vmlatency_printk(const char *fmt, ...);
 
 bool vmx_enabled(void);
 

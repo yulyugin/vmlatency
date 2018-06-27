@@ -15,49 +15,15 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
 */
 
+#include "vmx.h"
+#include "api.h"
+#include "asm-inlines.h"
+#include "cpu-defs.h"
+
 #include <linux/slab.h>
 #include <linux/types.h>
 #include <linux/highmem.h>
 #include <asm/io.h>
-
-#include "vmx.h"
-#include "asm-inlines.h"
-#include "cpu-defs.h"
-
-static inline int
-allocate_vmpage(vmpage_t *p)
-{
-        p->page = alloc_page(GFP_KERNEL | __GFP_ZERO);
-        if (!p->page)
-                return -1;
-
-        p->p = kmap(p->page);
-        p->pa = page_to_phys(p->page);
-        return 0;
-}
-
-static inline void
-free_vmpage(vmpage_t *p)
-{
-        kunmap(p->page);
-        __free_page(p->page);
-        p->page = NULL;
-        p->p = NULL;
-        p->pa = 0;
-}
-
-int
-printm(const char *fmt, ...)
-{
-        int ret;
-        va_list va;
-        va_start(va, fmt);
-        ret = vprintk(fmt, va);
-        va_end(va);
-        return ret;
-}
-
-#define vmlatency_printk(...) printm("[vmlatency] " __VA_ARGS__)
 
 static inline int
 allocate_memory(vm_monitor_t *vmm)

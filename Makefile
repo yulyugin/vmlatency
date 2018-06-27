@@ -1,5 +1,5 @@
 obj-m := vmlatency.o
-vmlatency-objs := ./linux/module.o ./vmm/vmx.o
+vmlatency-objs := ./linux/module.o ./linux/api.o ./vmm/vmx.o
 
 # Do not change flags for module.o!
 # It might cause compatibility problems with kernel.
