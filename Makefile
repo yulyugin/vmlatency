@@ -1,34 +1,18 @@
-KVERSION    = $(shell uname -r)
-KMAKE       = $(MAKE) -C /lib/modules/$(KVERSION)/build
+obj-m := vmlatency.o
+vmlatency-objs := ./linux/module.o ./vmm/vmx.o
 
-CC          = gcc
-CFLAGS      = -Wall -Werror
+# Do not change flags for module.o!
+# It might cause compatibility problems with kernel.
+CFLAGS_vmx.o := -Wno-declaration-after-statement -std=gnu99
 
-MKDIR       = mkdir -p
-LN          = ln -sf
-RM          = rm -rf
+srctree := /lib/modules/$(shell uname -r)/build
+HAS_BOOL := $(shell grep _Bool $(srctree)/include/linux/types.h \
+			> /dev/null 2>&1 && echo -DHAS_BOOL)
 
-ifeq ($(VERBOSE), yes)
-QUIET=
-else
-QUIET=@
-endif
+EXTRA_CFLAGS += $(HAS_BOOL) -I$(PWD)/vmm
 
-DRIVER_DIR=build-vmlatency-$(KVERSION)
+all:
+	make -C $(srctree) M=$(PWD) modules
 
-all: vmlatency-driver
-
-prepare-driver-dir:
-	$(QUIET)$(MKDIR) $(DRIVER_DIR)
-	$(QUIET)$(LN) ../vmm/module.c $(DRIVER_DIR)
-	$(QUIET)$(LN) ../vmm/vmx.c $(DRIVER_DIR)
-	$(QUIET)$(LN) ../vmm/GNUMakefile $(DRIVER_DIR)/Makefile
-	$(QUIET)for x in vmm/*.h ; do $(LN) ../$$x $(DRIVER_DIR) ; done
-
-vmlatency-driver: prepare-driver-dir
-	$(QUIET)$(KMAKE) M="$$PWD/$(DRIVER_DIR)"
-
-clean-driver:
-	$(QUIET)$(RM) "$(DRIVER_DIR)"
-
-clean: clean-driver
+clean:
+	make -C $(srctree) M=$(PWD) clean

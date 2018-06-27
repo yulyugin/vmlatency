@@ -52,6 +52,7 @@ Module.symvers
 Module.markers
 Mkfile.old
 dkms.conf
+.cache.mk
 
 # Windows build artifacts
 *.log
