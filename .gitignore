@@ -59,3 +59,8 @@ dkms.conf
 objfre_win7_amd64
 *.err
 build-win7-fre
+
+# Xcode artifacts
+build
+project.xcworkspace
+xcuserdata
