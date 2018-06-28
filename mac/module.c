@@ -18,6 +18,8 @@
 #include <sys/systm.h>
 #include <mach/mach_types.h>
 
+#include "vmx.h"
+
 kern_return_t vmlatency_start(kmod_info_t * ki, void *d);
 kern_return_t vmlatency_stop(kmod_info_t *ki, void *d);
 

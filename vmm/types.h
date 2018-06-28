@@ -32,7 +32,12 @@ typedef _Bool bool;
 #define false 0
 #endif
 
-#else // ndef __linux__
+#elif __APPLE__
+typedef uint16_t u16;
+typedef uint32_t u32;
+typedef uint64_t u64;
+
+#else  /* Windows */
 #include <ntdef.h>
 
 typedef unsigned __int64 uintptr_t;
@@ -46,6 +51,6 @@ typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
 
 #define inline __inline
-#endif
+#endif  /* Windows */
 
 #endif /* __TYPES_H__ */

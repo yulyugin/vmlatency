@@ -7,10 +7,12 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		BA8B2E6D20E507B100E06EE8 /* vmm in Resources */ = {isa = PBXBuildFile; fileRef = BA8B2E6C20E507B100E06EE8 /* vmm */; };
 		BA91AC0920E27F1300C6BC71 /* module.c in Sources */ = {isa = PBXBuildFile; fileRef = BA91AC0720E27F1300C6BC71 /* module.c */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		BA8B2E6C20E507B100E06EE8 /* vmm */ = {isa = PBXFileReference; lastKnownFileType = folder; path = vmm; sourceTree = "<group>"; };
 		BA91ABFC20E27C5500C6BC71 /* vmlatency.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = vmlatency.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA91AC0720E27F1300C6BC71 /* module.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.c.c; path = module.c; sourceTree = "<group>"; tabWidth = 8; };
 		BA91AC0820E27F1300C6BC71 /* vmlatency-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "vmlatency-Info.plist"; sourceTree = "<group>"; };
@@ -30,6 +32,7 @@
 		BA91ABF220E27C5500C6BC71 = {
 			isa = PBXGroup;
 			children = (
+				BA8B2E6C20E507B100E06EE8 /* vmm */,
 				BA91ABFE20E27C5500C6BC71 /* mac */,
 				BA91ABFD20E27C5500C6BC71 /* Products */,
 			);
@@ -119,6 +122,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BA8B2E6D20E507B100E06EE8 /* vmm in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -257,6 +261,7 @@
 				ONLY_ACTIVE_ARCH = NO;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vmlatency.kext;
 				PRODUCT_NAME = vmlatency;
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = vmm;
 				VALID_ARCHS = x86_64;
 				WRAPPER_EXTENSION = kext;
 			};
@@ -273,6 +278,7 @@
 				MODULE_VERSION = 1.0.0d1;
 				PRODUCT_BUNDLE_IDENTIFIER = com.vmlatency.kext;
 				PRODUCT_NAME = vmlatency;
+				"USER_HEADER_SEARCH_PATHS[arch=*]" = vmm;
 				VALID_ARCHS = x86_64;
 				WRAPPER_EXTENSION = kext;
 			};
