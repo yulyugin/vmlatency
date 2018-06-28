@@ -15,4 +15,18 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include <stdarg.h>
+#include <sys/systm.h>
+
 #include "api.h"
+
+int
+vmlatency_printm(const char *fmt, ...)
+{
+    int ret;
+    va_list va;
+    va_start(va, fmt);
+    ret = printf(fmt, va);
+    va_end(va);
+    return ret;
+}
