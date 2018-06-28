@@ -27,6 +27,9 @@ typedef struct vmpage {
 int allocate_vmpage(vmpage_t *p);
 void free_vmpage(vmpage_t *p);
 
+unsigned long vmlatency_get_cpu(void);
+void vmlatency_put_cpu(unsigned long irq_flags);
+
 int vmlatency_printm(const char *fmt, ...);
 
 #define vmlatency_printk(...) vmlatency_printm("[vmlatency] " __VA_ARGS__)

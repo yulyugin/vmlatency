@@ -20,11 +20,6 @@
 #include "asm-inlines.h"
 #include "cpu-defs.h"
 
-#include <linux/slab.h>
-#include <linux/types.h>
-#include <linux/highmem.h>
-#include <asm/io.h>
-
 static inline int
 allocate_memory(vm_monitor_t *vmm)
 {
@@ -452,9 +447,7 @@ measure_vmlatency()
         vmcs_setup_revision_id(&vmm);
 
         /* Disable interrupts */
-        get_cpu();
-        unsigned long irq_flags;
-        local_irq_save(irq_flags);
+        unsigned long irq_flags = vmlatency_get_cpu();
 
         do_vmxon(&vmm);
         if (do_vmptrld(&vmm) != 0)
@@ -507,8 +500,7 @@ out2:
         do_vmxoff(&vmm);
 
         /* Enable interrupts */
-        local_irq_restore(irq_flags);
-        put_cpu();
+        vmlatency_put_cpu(irq_flags);
 out1:
         free_memory(&vmm, cnt);
 }

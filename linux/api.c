@@ -54,3 +54,19 @@ vmlatency_printm(const char *fmt, ...)
         va_end(va);
         return ret;
 }
+
+unsigned long
+vmlatency_get_cpu(void)
+{
+        unsigned long irq_flags;
+        get_cpu();
+        local_irq_save(irq_flags);
+        return irq_flags;
+}
+
+void
+vmlatency_put_cpu(unsigned long irq_flags)
+{
+        local_irq_restore(irq_flags);
+        put_cpu();
+}
