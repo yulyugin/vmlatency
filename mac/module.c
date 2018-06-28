@@ -16,7 +16,6 @@
  */
 
 #include <sys/systm.h>
-#include <mach/mach_types.h>
 
 #include "vmx.h"
 

@@ -33,6 +33,8 @@ typedef _Bool bool;
 #endif
 
 #elif __APPLE__
+#include <mach/mach_types.h>
+
 typedef uint16_t u16;
 typedef uint32_t u32;
 typedef uint64_t u64;

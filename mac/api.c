@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Evgeny Yulyugin
+ * Copyright (c) 2018 Evgeny Yulyugin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -13,27 +13,6 @@
  *
  * You should have received a copy of the GNU General Public License
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
-*/
+ */
 
-#ifndef __VMM_API_H__
-#define __VMM_API_H__
-
-#include "types.h"
-
-typedef struct vmpage {
-        struct page *page;
-        char *p;
-        uintptr_t pa;
-} vmpage_t;
-
-int allocate_vmpage(vmpage_t *p);
-void free_vmpage(vmpage_t *p);
-
-unsigned long vmlatency_get_cpu(void);
-void vmlatency_put_cpu(unsigned long irq_flags);
-
-int vmlatency_printm(const char *fmt, ...);
-
-#define vmlatency_printk(...) vmlatency_printm("[vmlatency] " __VA_ARGS__)
-
-#endif /* __VMM_API_H__*/
+#include "api.h"
