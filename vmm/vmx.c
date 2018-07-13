@@ -20,6 +20,8 @@
 #include "asm-inlines.h"
 #include "cpu-defs.h"
 
+extern void guest_code(void);
+
 static inline int
 allocate_memory(vm_monitor_t *vmm)
 {
@@ -460,9 +462,8 @@ measure_vmlatency()
         __vmwrite(VMCS_GUEST_RSP, rsp);
         __vmwrite(VMCS_HOST_RSP, rsp);
 
-        u64 guest_rip;
-        __asm__ __volatile__("movq $guest_code, %0":"=r"(guest_rip));
-        __vmwrite(VMCS_GUEST_RIP, guest_rip);
+        __vmwrite(VMCS_GUEST_RIP, (uintptr_t)&guest_code);
+
         u64 host_rip;
         __asm__ __volatile__("movq $vmlaunch_exit, %0":"=r"(host_rip));
         __vmwrite(VMCS_HOST_RIP, host_rip);
@@ -472,9 +473,6 @@ measure_vmlatency()
                 handle_early_exit();
                 goto out3;
         }
-
-        __asm__ __volatile__("guest_code:");
-        __asm__ __volatile__("cpuid"); // Will cause VM exit
 
         vmlatency_printk("Error: unreachable point.\n");
 
