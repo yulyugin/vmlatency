@@ -474,17 +474,10 @@ measure_vmlatency()
 
         handle_vmexit();
 
-        u64 host_rip;
-        __asm__ __volatile__("movq $vmresume_exit, %0":"=r"(host_rip));
-        __vmwrite(VMCS_HOST_RIP, host_rip);
-        __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
-        __vmwrite(VMCS_HOST_RSP, rsp);
-
         for (int n = 1; n < __BIT(20); n *= 2) {
                 u64 start = __rdtsc();
                 for (int i = 0; i < n; i++) {
-                        __asm__ __volatile__("vmresume");
-                        __asm__ __volatile__("vmresume_exit:");
+                        do_vmresume();
                 }
                 u64 end = __rdtsc();
                 vmlatency_printk("%6d - %lld\n", n, (end - start) / n);

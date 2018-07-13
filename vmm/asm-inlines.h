@@ -274,5 +274,6 @@ __rdtsc(void)
 }
 
 extern int do_vmlaunch(void);
+extern int do_vmresume(void);
 
 #endif /* __ASM_INLINES_H__ */

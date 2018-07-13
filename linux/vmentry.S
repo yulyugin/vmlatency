@@ -34,6 +34,12 @@
 do_vmlaunch:
         vmentry_prepare
         vmlaunch
+        jmp entry_error
+
+.globl do_vmresume
+do_vmresume:
+        vmentry_prepare
+        vmresume
         /* fall through */
 
 entry_error:
@@ -51,4 +57,5 @@ vmx_return:
         popf  /* restore rflags */
         ret
 .type do_vmlaunch @function
+.type do_vmresume @function
 .type vmx_exit @function
