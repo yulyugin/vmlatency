@@ -245,18 +245,6 @@ __vmclear(uintptr_t vmcs_pa)
         return 0;
 }
 
-static inline int
-__vmlaunch(void)
-{
-        u64 rflags;
-        __asm__ __volatile__(
-                "vmlaunch;"
-                SAVE_RFLAGS(rflags));
-        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
-                return -1;
-        return 0;
-}
-
 static inline void
 __vmwrite(u64 field, u64 value)
 {
@@ -284,5 +272,7 @@ __rdtsc(void)
                 :"=a"(eax), "=d"(edx));
         return ((u64)edx << 32) | eax;
 }
+
+extern int do_vmlaunch(void);
 
 #endif /* __ASM_INLINES_H__ */

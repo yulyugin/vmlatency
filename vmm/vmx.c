@@ -460,27 +460,25 @@ measure_vmlatency()
         u64 rsp;
         __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
         __vmwrite(VMCS_GUEST_RSP, rsp);
-        __vmwrite(VMCS_HOST_RSP, rsp);
 
         __vmwrite(VMCS_GUEST_RIP, (uintptr_t)&guest_code);
 
-        u64 host_rip;
-        __asm__ __volatile__("movq $vmlaunch_exit, %0":"=r"(host_rip));
-        __vmwrite(VMCS_HOST_RIP, host_rip);
+        extern char vmx_exit[];  /* assembly export */
+        __vmwrite(VMCS_HOST_RIP, (uintptr_t)vmx_exit);
 
-        if (__vmlaunch() != 0) {
+        if (do_vmlaunch() != 0) {
                 vmlatency_printk("VMLAUNCH failed\n");
                 handle_early_exit();
                 goto out3;
         }
 
-        vmlatency_printk("Error: unreachable point.\n");
-
-        __asm__ __volatile__("vmlaunch_exit:");
         handle_vmexit();
 
+        u64 host_rip;
         __asm__ __volatile__("movq $vmresume_exit, %0":"=r"(host_rip));
         __vmwrite(VMCS_HOST_RIP, host_rip);
+        __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
+        __vmwrite(VMCS_HOST_RSP, rsp);
 
         for (int n = 1; n < __BIT(20); n *= 2) {
                 u64 start = __rdtsc();
