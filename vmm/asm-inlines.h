@@ -170,20 +170,16 @@ __sldt(void)
         return ldtr;
 }
 
-static inline descriptor_t
-__sgdt(void)
+static inline void
+__get_gdt(descriptor_t *gdtr)
 {
-        descriptor_t gdtr;
-        __asm__ __volatile__("sgdt %0":"=m"(gdtr));
-        return gdtr;
+        __asm__ __volatile__("sgdt %0":"=m"(*gdtr));
 }
 
-static inline descriptor_t
-__sidt(void)
+static inline void
+__get_idt(descriptor_t *idtr)
 {
-        descriptor_t idtr;
-        __asm__ __volatile__("sidt %0":"=m"(idtr));
-        return idtr;
+        __asm__ __volatile__("sidt %0":"=m"(*idtr));
 }
 
 static inline u16

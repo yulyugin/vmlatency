@@ -147,6 +147,7 @@ static inline void
 initialize_vmcs(vm_monitor_t *vmm)
 {
         u16 val16;
+        descriptor_t gdtr, idtr;
 
         /* Segment registers */
         val16 = __get_es();
@@ -201,12 +202,12 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_LDTR_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_LDTR_ACCESS_RIGHTS, UNUSABLE_AR);
 
-        descriptor_t gdtr = __sgdt();
+        __get_gdt(&gdtr);
         __vmwrite(VMCS_GUEST_GDTR_LIMIT, gdtr.limit);
         __vmwrite(VMCS_GUEST_GDTR_BASE, gdtr.base);
         __vmwrite(VMCS_HOST_GDTR_BASE, gdtr.base);
 
-        descriptor_t idtr = __sidt();
+        __get_idt(&idtr);
         __vmwrite(VMCS_GUEST_IDTR_LIMIT, idtr.limit);
         __vmwrite(VMCS_GUEST_IDTR_BASE, idtr.base);
         __vmwrite(VMCS_HOST_IDTR_BASE, idtr.base);
