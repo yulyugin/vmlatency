@@ -280,6 +280,14 @@ __get_rsp(void)
         return rsp;
 }
 
+static inline u64
+__get_rflags(void)
+{
+        u64 rflags;
+        __asm__ __volatile__(SAVE_RFLAGS(rflags));
+        return rflags;
+}
+
 extern int do_vmlaunch(void);
 extern int do_vmresume(void);
 

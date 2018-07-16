@@ -299,7 +299,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         /* Natural-width guest/host state */
         __vmwrite(VMCS_GUEST_DR7, 0x400); /* Initial value */
 
-        __asm__ __volatile__(SAVE_RFLAGS(rflags));
+        rflags = __get_rflags();
         __vmwrite(VMCS_GUEST_RFLAGS, rflags);
 
         __vmwrite(VMCS_GUEST_PENDING_DBG_EXCEPTION, 0);
