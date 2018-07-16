@@ -33,6 +33,8 @@ typedef _Bool bool;
 #endif
 
 #else // ndef __linux__
+typedef unsigned __int64 uintptr_t;
+
 typedef BOOLEAN bool;
 #define true TRUE
 #define false FALSE
