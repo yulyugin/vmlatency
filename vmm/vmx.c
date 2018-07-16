@@ -146,8 +146,14 @@ get_segment_ar(u16 seg)
 static inline void
 initialize_vmcs(vm_monitor_t *vmm)
 {
-        u16 val16;
+        u16 val16, tr, tr_limit;
         descriptor_t gdtr, idtr;
+        u64 fs_base, gs_base;
+        u64 trbase, trdesc_lo, trdesc_hi;
+        u32 ia32_sysenter_cs;
+        u64 ia32_sysenter_esp, ia32_sysenter_eip;
+        u64 cr0, cr3, cr4;
+        u64 rflags;
 
         /* Segment registers */
         val16 = __get_es();
@@ -181,7 +187,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         val16 = __get_fs();
         __vmwrite(VMCS_HOST_FS, val16);
         __vmwrite(VMCS_GUEST_FS, val16);
-        u64 fs_base = __rdmsr(IA32_FS_BASE);
+        fs_base = __rdmsr(IA32_FS_BASE);
         __vmwrite(VMCS_GUEST_FS_BASE, fs_base);
         __vmwrite(VMCS_HOST_FS_BASE, fs_base);
         __vmwrite(VMCS_GUEST_FS_LIMIT, 0xffffffff);
@@ -190,7 +196,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         val16 = __get_gs();
         __vmwrite(VMCS_HOST_GS, val16);
         __vmwrite(VMCS_GUEST_GS, val16);
-        u64 gs_base = __rdmsr(IA32_GS_BASE);
+        gs_base = __rdmsr(IA32_GS_BASE);
         __vmwrite(VMCS_GUEST_GS_BASE, gs_base);
         __vmwrite(VMCS_HOST_GS_BASE, gs_base);
         __vmwrite(VMCS_GUEST_GS_LIMIT, 0xffffffff);
@@ -212,17 +218,17 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_IDTR_BASE, idtr.base);
         __vmwrite(VMCS_HOST_IDTR_BASE, idtr.base);
 
-        u16 tr = __str();
-        u16 tr_limit = __lsl(tr);
+        tr = __str();
+        tr_limit = __lsl(tr);
         __vmwrite(VMCS_GUEST_TR, tr);
         __vmwrite(VMCS_HOST_TR, tr);
         __vmwrite(VMCS_GUEST_TR_LIMIT, tr_limit);
         __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, get_segment_ar(tr));
         /* Extracting TR.base for GDT */
-        u64 trdesc_lo = ((u64*)(gdtr.base + tr))[0];
-        u64 trbase = ((trdesc_lo >> 16) & 0xffffff)
-                   | (((trdesc_lo >> 56) & 0xff) << 24);
-        u64 trdesc_hi = ((u64*)(gdtr.base + tr))[1];
+        trdesc_lo = ((u64*)(gdtr.base + tr))[0];
+        trbase = ((trdesc_lo >> 16) & 0xffffff)
+               | (((trdesc_lo >> 56) & 0xff) << 24);
+        trdesc_hi = ((u64*)(gdtr.base + tr))[1];
         trbase |= trdesc_hi << 32;
         __vmwrite(VMCS_GUEST_TR_BASE, trbase);
         __vmwrite(VMCS_HOST_TR_BASE, trbase);
@@ -265,24 +271,24 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_SMBASE, 0);
 
         /* 32-bit guest state*/
-        u32 ia32_sysenter_cs = __rdmsr(IA32_SYSENTER_CS);
+        ia32_sysenter_cs = __rdmsr(IA32_SYSENTER_CS);
         __vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, ia32_sysenter_cs);
         __vmwrite(VMCS_HOST_IA32_SYSENTER_CS, ia32_sysenter_cs);
 
         /* Control registers */
-        u64 cr0 = __get_cr0();
+        cr0 = __get_cr0();
         __vmwrite(VMCS_GUEST_CR0, cr0);
         __vmwrite(VMCS_HOST_CR0, cr0);
         __vmwrite(VMCS_CR0_GUEST_HOST_MASK, 0);
         __vmwrite(VMCS_CR0_READ_SHADOW, 0);
 
-        u64 cr4 = __get_cr4();
+        cr4 = __get_cr4();
         __vmwrite(VMCS_GUEST_CR4, cr4);
         __vmwrite(VMCS_HOST_CR4, cr4);
         __vmwrite(VMCS_CR4_GUEST_HOST_MASK, 0);
         __vmwrite(VMCS_CR4_READ_SHADOW, 0);
 
-        u64 cr3 = __get_cr3();
+        cr3 = __get_cr3();
         __vmwrite(VMCS_GUEST_CR3, cr3);
         __vmwrite(VMCS_HOST_CR3, cr3);
         __vmwrite(VMCS_CR3_TARGET_VALUE_0, 0);
@@ -293,17 +299,16 @@ initialize_vmcs(vm_monitor_t *vmm)
         /* Natural-width guest/host state */
         __vmwrite(VMCS_GUEST_DR7, 0x400); /* Initial value */
 
-        u64 rflags;
         __asm__ __volatile__(SAVE_RFLAGS(rflags));
         __vmwrite(VMCS_GUEST_RFLAGS, rflags);
 
         __vmwrite(VMCS_GUEST_PENDING_DBG_EXCEPTION, 0);
 
-        u64 ia32_sysenter_esp = __rdmsr(IA32_SYSENTER_ESP);
+        ia32_sysenter_esp = __rdmsr(IA32_SYSENTER_ESP);
         __vmwrite(VMCS_GUEST_IA32_SYSENTER_ESP, ia32_sysenter_esp);
         __vmwrite(VMCS_HOST_IA32_SYSENTER_ESP, ia32_sysenter_esp);
 
-        u64 ia32_sysenter_eip = __rdmsr(IA32_SYSENTER_EIP);
+        ia32_sysenter_eip = __rdmsr(IA32_SYSENTER_EIP);
         __vmwrite(VMCS_GUEST_IA32_SYSENTER_EIP, ia32_sysenter_esp);
         __vmwrite(VMCS_HOST_IA32_SYSENTER_EIP, ia32_sysenter_eip);
 }
@@ -317,7 +322,9 @@ void
 print_vmx_info()
 {
         char brand_string[48];
-        for (int i = 0; i < 3; i++) {
+        bool has_true_ctls, has_secondary_ctls, has_ept, has_vmfunc;
+        int i;
+        for (i = 0; i < 3; i++) {
                 __cpuid_all(0x80000002 + i, 0, (u32*)&brand_string[0 + 16 * i],
                             (u32*)&brand_string[4 + 16 * i],
                             (u32*)&brand_string[8 + 16 * i],
@@ -325,7 +332,7 @@ print_vmx_info()
         }
         vmlatency_printk("%s\n", brand_string);
 
-        bool has_true_ctls = __rdmsr(IA32_VMX_BASIC) & __BIT(55);
+        has_true_ctls = __rdmsr(IA32_VMX_BASIC) & __BIT(55);
 
         PRINT_VMXCAP_MSR(IA32_VMX_BASIC);
         PRINT_VMXCAP_MSR(IA32_VMX_PINBASED_CTLS);
@@ -339,13 +346,13 @@ print_vmx_info()
         PRINT_VMXCAP_MSR(IA32_VMX_CR4_FIXED1);
         PRINT_VMXCAP_MSR(IA32_VMX_VMCS_ENUM);
 
-        bool has_secondary_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS)
-                                & (VMX_PROC_CTL_ACTIVATE_SECONDARY_CTLS << 32);
+        has_secondary_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS)
+                           & (VMX_PROC_CTL_ACTIVATE_SECONDARY_CTLS << 32);
 
         if (has_secondary_ctls) {
                 PRINT_VMXCAP_MSR(IA32_VMX_PROCBASED_CTLS2);
-                bool has_ept = __rdmsr(IA32_VMX_PROCBASED_CTLS2)
-                             & (VMX_PROC_CTL2_ENABLE_EPT << 32);
+                has_ept = __rdmsr(IA32_VMX_PROCBASED_CTLS2)
+                        & (VMX_PROC_CTL2_ENABLE_EPT << 32);
                 if (has_ept)
                         PRINT_VMXCAP_MSR(IA32_VMX_EPT_VPID_CAP);
         }
@@ -358,8 +365,8 @@ print_vmx_info()
         }
 
         if (has_secondary_ctls) {
-                bool has_vmfunc = __rdmsr(IA32_VMX_PROCBASED_CTLS2)
-                                & (VMX_PROC_CTL2_ENABLE_VMFUNC << 32);
+                has_vmfunc = __rdmsr(IA32_VMX_PROCBASED_CTLS2)
+                           & (VMX_PROC_CTL2_ENABLE_VMFUNC << 32);
                 if (has_vmfunc)
                         PRINT_VMXCAP_MSR(IA32_VMX_VMFUNC);
         }
@@ -440,9 +447,16 @@ void
 measure_vmlatency()
 {
         vm_monitor_t vmm = {0};
+        int cnt;  /* error counter for memory allocation */
+        int i, n;  /* loop counters */
+        unsigned long irq_flags;
+        u64 start, end;
+        extern char vmx_exit[];  /* assembly export */
+        u64 rsp;
+
         cache_vmx_capabilities(&vmm);
 
-        int cnt = allocate_memory(&vmm);
+        cnt = allocate_memory(&vmm);
         if (cnt <= 0)
                 goto out1;
 
@@ -450,7 +464,7 @@ measure_vmlatency()
         vmcs_setup_revision_id(&vmm);
 
         /* Disable interrupts */
-        unsigned long irq_flags = vmlatency_get_cpu();
+        irq_flags = vmlatency_get_cpu();
 
         do_vmxon(&vmm);
         if (do_vmptrld(&vmm) != 0)
@@ -458,13 +472,11 @@ measure_vmlatency()
 
         initialize_vmcs(&vmm);
 
-        u64 rsp;
         __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
         __vmwrite(VMCS_GUEST_RSP, rsp);
 
         __vmwrite(VMCS_GUEST_RIP, (uintptr_t)&guest_code);
 
-        extern char vmx_exit[];  /* assembly export */
         __vmwrite(VMCS_HOST_RIP, (uintptr_t)vmx_exit);
 
         if (do_vmlaunch() != 0) {
@@ -475,12 +487,12 @@ measure_vmlatency()
 
         handle_vmexit();
 
-        for (int n = 1; n < __BIT(20); n *= 2) {
-                u64 start = __rdtsc();
-                for (int i = 0; i < n; i++) {
+        for (n = 1; n < __BIT(20); n *= 2) {
+                start = __rdtsc();
+                for (i = 0; i < n; i++) {
                         do_vmresume();
                 }
-                u64 end = __rdtsc();
+                end = __rdtsc();
                 vmlatency_printk("%6d - %lld\n", n, (end - start) / n);
         }
 
