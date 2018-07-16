@@ -28,6 +28,8 @@ typedef struct {
 } descriptor_t;
 #pragma pack(pop)
 
+#ifdef __GNUC__
+
 #define SAVE_RFLAGS(rflags) \
         "pushfq;"           \
         "popq %0;"          \
@@ -287,6 +289,46 @@ __get_rflags(void)
         __asm__ __volatile__(SAVE_RFLAGS(rflags));
         return rflags;
 }
+#else  /* !__GNUC__ */
+
+extern void __cpuid_all(u32 l, u32 subl, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx);
+extern u32 __cpuid_ecx(u32 leaf, u32 subleaf);
+
+extern u64 __rdmsr(u32 msr_num);
+
+extern u64 __get_cr0(void);
+extern u64 __get_cr3(void);
+extern u64 __get_cr4(void);
+extern void __set_cr4(u64 cr4);
+
+extern u16 __get_es(void);
+extern u16 __get_cs(void);
+extern u16 __get_ss(void);
+extern u16 __get_ds(void);
+extern u16 __get_fs(void);
+extern u16 __get_gs(void);
+
+extern u32 __lar(u16 seg);
+extern u16 __lsl(u16 seg);
+
+extern u16 __sldt(void);
+extern void __get_gdt(descriptor_t *gdt);
+extern void __get_idt(descriptor_t *idt);
+extern u16 __str(void);
+
+extern int __vmxon(uintptr_t vmxon_region_pa);
+extern int __vmxoff(void);
+extern int __vmptrld(uintptr_t vmcs_pa);
+extern int __vmclear(uintptr_t vmcs_pa);
+extern void __vmwrite(u64 field, u64 value);
+extern u64 __vmread(u64 field);
+
+extern u64 __rdtsc(void);
+
+extern u64 __get_rsp(void);
+extern u64 __get_rflags(void);
+
+#endif /* !__GNUC__ */
 
 extern int do_vmlaunch(void);
 extern int do_vmresume(void);
