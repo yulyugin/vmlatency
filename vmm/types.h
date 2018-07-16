@@ -44,6 +44,8 @@ typedef BOOLEAN bool;
 typedef unsigned __int16 u16;
 typedef unsigned __int32 u32;
 typedef unsigned __int64 u64;
+
+#define inline __inline
 #endif
 
 #endif /* __TYPES_H__ */
