@@ -472,11 +472,14 @@ measure_vmlatency()
 
         initialize_vmcs(&vmm);
 
-        __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
+        rsp = __get_rsp();
+        /* Return address will be pushed to stack by call instruction in
+         * do_vmlaunch or do_vmresume, adjust rsp to reflect that */
+        rsp -= 8;
         __vmwrite(VMCS_GUEST_RSP, rsp);
+        __vmwrite(VMCS_HOST_RSP, rsp);
 
         __vmwrite(VMCS_GUEST_RIP, (uintptr_t)&guest_code);
-
         __vmwrite(VMCS_HOST_RIP, (uintptr_t)vmx_exit);
 
         if (do_vmlaunch() != 0) {

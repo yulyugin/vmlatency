@@ -269,6 +269,17 @@ __rdtsc(void)
         return ((u64)edx << 32) | eax;
 }
 
+static noinline u64
+__get_rsp(void)
+{
+        u64 rsp;
+        __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
+        /* discard a return address of the function from stack
+         * to get a caller stack pointer */
+        rsp += 8;
+        return rsp;
+}
+
 extern int do_vmlaunch(void);
 extern int do_vmresume(void);
 
