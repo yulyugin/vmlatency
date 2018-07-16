@@ -271,7 +271,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_SMBASE, 0);
 
         /* 32-bit guest state*/
-        ia32_sysenter_cs = __rdmsr(IA32_SYSENTER_CS);
+        ia32_sysenter_cs = (u32)__rdmsr(IA32_SYSENTER_CS);
         __vmwrite(VMCS_GUEST_IA32_SYSENTER_CS, ia32_sysenter_cs);
         __vmwrite(VMCS_HOST_IA32_SYSENTER_CS, ia32_sysenter_cs);
 
@@ -332,7 +332,7 @@ print_vmx_info()
         }
         vmlatency_printk("%s\n", brand_string);
 
-        has_true_ctls = __rdmsr(IA32_VMX_BASIC) & __BIT(55);
+        has_true_ctls = !!(__rdmsr(IA32_VMX_BASIC) & __BIT(55));
 
         PRINT_VMXCAP_MSR(IA32_VMX_BASIC);
         PRINT_VMXCAP_MSR(IA32_VMX_PINBASED_CTLS);
@@ -346,13 +346,13 @@ print_vmx_info()
         PRINT_VMXCAP_MSR(IA32_VMX_CR4_FIXED1);
         PRINT_VMXCAP_MSR(IA32_VMX_VMCS_ENUM);
 
-        has_secondary_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS)
-                           & (VMX_PROC_CTL_ACTIVATE_SECONDARY_CTLS << 32);
+        has_secondary_ctls = !!(__rdmsr(IA32_VMX_PROCBASED_CTLS)
+                                & (VMX_PROC_CTL_ACTIVATE_SECONDARY_CTLS << 32));
 
         if (has_secondary_ctls) {
                 PRINT_VMXCAP_MSR(IA32_VMX_PROCBASED_CTLS2);
-                has_ept = __rdmsr(IA32_VMX_PROCBASED_CTLS2)
-                        & (VMX_PROC_CTL2_ENABLE_EPT << 32);
+                has_ept = !!(__rdmsr(IA32_VMX_PROCBASED_CTLS2)
+                             & (VMX_PROC_CTL2_ENABLE_EPT << 32));
                 if (has_ept)
                         PRINT_VMXCAP_MSR(IA32_VMX_EPT_VPID_CAP);
         }
@@ -365,8 +365,8 @@ print_vmx_info()
         }
 
         if (has_secondary_ctls) {
-                has_vmfunc = __rdmsr(IA32_VMX_PROCBASED_CTLS2)
-                           & (VMX_PROC_CTL2_ENABLE_VMFUNC << 32);
+                has_vmfunc = !!(__rdmsr(IA32_VMX_PROCBASED_CTLS2)
+                                & (VMX_PROC_CTL2_ENABLE_VMFUNC << 32));
                 if (has_vmfunc)
                         PRINT_VMXCAP_MSR(IA32_VMX_VMFUNC);
         }
@@ -377,7 +377,7 @@ cache_vmx_capabilities(vm_monitor_t *vmm)
 {
         vmm->ia32_vmx_basic = __rdmsr(IA32_VMX_BASIC);
         vmm->vmcs_revision_id = vmm->ia32_vmx_basic & 0x8fffffff;
-        vmm->has_true_ctls = vmm->ia32_vmx_basic & __BIT(55);
+        vmm->has_true_ctls = !!(vmm->ia32_vmx_basic & __BIT(55));
 
         vmm->ia32_vmx_pinbased_ctls = __rdmsr(IA32_VMX_PINBASED_CTLS);
         vmm->ia32_vmx_procbased_ctls = __rdmsr(IA32_VMX_PROCBASED_CTLS);
@@ -433,7 +433,7 @@ handle_early_exit(void)
 static inline int
 handle_vmexit(void)
 {
-        u32 exit_reason = __vmread(VMCS_EXIT_REASON);
+        u32 exit_reason = (u32)__vmread(VMCS_EXIT_REASON);
         int basic_exit_reason = exit_reason & 0xffff;
         if (basic_exit_reason != VMEXIT_CPUID) {
                 vmlatency_printk("Error: VM exit is not caused by CPUID."
