@@ -2,4 +2,6 @@ TARGETNAME=vmlatency
 TARGETTYPE=DRIVER
 TARGETPATH=../build-$(DDK_TARGET_OS)-$(DDKBUILDENV)
 
-SOURCES=module.c
+INCLUDES=../vmm
+
+SOURCES=module.c api.c

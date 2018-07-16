@@ -16,8 +16,8 @@
 */
 
 #include <ntddk.h>
-#include <stdarg.h>
-#include <string.h>
+
+#include "api.h"
 
 #define NT_DEVICE_NAME  L"\\Device\\VMLATENCY"
 
@@ -27,17 +27,6 @@ DRIVER_UNLOAD VmlatencyUnloadDriver;
 #ifdef ALLOC_PRAGMA
 #pragma alloc_text(INIT, DriverEntry)
 #endif /* ALLOC_PRAGMA */
-
-int
-vmlatency_printk(const char *fmt, ...)
-{
-    va_list va;
-    va_start(va, fmt);
-    vDbgPrintExWithPrefix("[vmlatency] ", DPFLTR_IHVDRIVER_ID,
-                          DPFLTR_INFO_LEVEL, fmt, va);
-    va_end(va);
-    return 0;
-}
 
 NTSTATUS
 DriverEntry(__in PDRIVER_OBJECT DriverObject,
