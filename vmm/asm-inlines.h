@@ -262,7 +262,7 @@ __vmread(u64 field)
 }
 
 static inline u64
-__rdtsc(void)
+__get_tsc(void)
 {
         u32 eax, edx;
         __asm__ __volatile__(
@@ -323,7 +323,7 @@ extern int __vmclear(uintptr_t vmcs_pa);
 extern void __vmwrite(u64 field, u64 value);
 extern u64 __vmread(u64 field);
 
-extern u64 __rdtsc(void);
+extern u64 __get_tsc(void);
 
 extern u64 __get_rsp(void);
 extern u64 __get_rflags(void);

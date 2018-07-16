@@ -491,11 +491,11 @@ measure_vmlatency()
         handle_vmexit();
 
         for (n = 1; n < __BIT(20); n *= 2) {
-                start = __rdtsc();
+                start = __get_tsc();
                 for (i = 0; i < n; i++) {
                         do_vmresume();
                 }
-                end = __rdtsc();
+                end = __get_tsc();
                 vmlatency_printk("%6d - %lld\n", n, (end - start) / n);
         }
 
