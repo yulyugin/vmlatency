@@ -24,12 +24,15 @@ kern_return_t vmlatency_stop(kmod_info_t *ki, void *d);
 
 kern_return_t vmlatency_start(kmod_info_t * ki, void *d)
 {
-        vmlatency_printk("vmlatency has started.\n");
+        if (!vmx_enabled())
+                return KERN_SUCCESS;
+
+        print_vmx_info();
+
         return KERN_SUCCESS;
 }
 
 kern_return_t vmlatency_stop(kmod_info_t *ki, void *d)
 {
-        vmlatency_printk("vmlatency has stopped.\n");
         return KERN_SUCCESS;
 }
