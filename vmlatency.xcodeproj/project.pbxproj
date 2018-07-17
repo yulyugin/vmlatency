@@ -11,6 +11,7 @@
 		BA8B2E6F20E50BD800E06EE8 /* api.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8B2E6E20E50BD800E06EE8 /* api.c */; };
 		BA8B2E7320EB966500E06EE8 /* vmx.c in Sources */ = {isa = PBXBuildFile; fileRef = BA8B2E7220EB966500E06EE8 /* vmx.c */; };
 		BA8B2E7520FDEFE700E06EE8 /* guest.s in Sources */ = {isa = PBXBuildFile; fileRef = BA8B2E7420FDEFE700E06EE8 /* guest.s */; };
+		BA8B2E7720FDF21600E06EE8 /* vmentry.s in Sources */ = {isa = PBXBuildFile; fileRef = BA8B2E7620FDF21600E06EE8 /* vmentry.s */; };
 		BA91AC0920E27F1300C6BC71 /* module.c in Sources */ = {isa = PBXBuildFile; fileRef = BA91AC0720E27F1300C6BC71 /* module.c */; };
 /* End PBXBuildFile section */
 
@@ -19,6 +20,7 @@
 		BA8B2E6E20E50BD800E06EE8 /* api.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = api.c; sourceTree = "<group>"; };
 		BA8B2E7220EB966500E06EE8 /* vmx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = vmx.c; path = vmm/vmx.c; sourceTree = SOURCE_ROOT; };
 		BA8B2E7420FDEFE700E06EE8 /* guest.s */ = {isa = PBXFileReference; indentWidth = 8; lastKnownFileType = sourcecode.asm; path = guest.s; sourceTree = "<group>"; tabWidth = 8; };
+		BA8B2E7620FDF21600E06EE8 /* vmentry.s */ = {isa = PBXFileReference; indentWidth = 8; lastKnownFileType = sourcecode.asm; path = vmentry.s; sourceTree = "<group>"; tabWidth = 8; };
 		BA91ABFC20E27C5500C6BC71 /* vmlatency.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = vmlatency.kext; sourceTree = BUILT_PRODUCTS_DIR; };
 		BA91AC0720E27F1300C6BC71 /* module.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.c.c; path = module.c; sourceTree = "<group>"; tabWidth = 8; };
 		BA91AC0820E27F1300C6BC71 /* vmlatency-Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = "vmlatency-Info.plist"; sourceTree = "<group>"; };
@@ -60,6 +62,7 @@
 				BA91AC0720E27F1300C6BC71 /* module.c */,
 				BA8B2E6E20E50BD800E06EE8 /* api.c */,
 				BA8B2E7420FDEFE700E06EE8 /* guest.s */,
+				BA8B2E7620FDF21600E06EE8 /* vmentry.s */,
 			);
 			path = mac;
 			sourceTree = "<group>";
@@ -142,6 +145,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				BA8B2E7720FDF21600E06EE8 /* vmentry.s in Sources */,
 				BA8B2E7520FDEFE700E06EE8 /* guest.s in Sources */,
 				BA8B2E7320EB966500E06EE8 /* vmx.c in Sources */,
 				BA8B2E6F20E50BD800E06EE8 /* api.c in Sources */,
