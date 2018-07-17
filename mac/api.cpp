@@ -16,18 +16,42 @@
  */
 
 #include <sys/systm.h>
+#include <IOKit/IOBufferMemoryDescriptor.h>
 
 #include "api.h"
 
 int
 allocate_vmpage(vmpage_t *p)
 {
+        IOOptionBits options = kIODirectionInOut | kIOMemoryMapperNone
+                             | kIOMemoryPhysicallyContiguous;
+        p->page = IOBufferMemoryDescriptor::inTaskWithOptions(kernel_task,
+                                                              options, 0x1000,
+                                                              0x1000);
+
+        if (!p->page)
+                return -1;
+
+        IOReturn IORet = p->page->prepare();
+        if (IORet != kIOReturnSuccess) {
+                p->page->release();
+                return -1;
+        }
+
+        p->p = (char *)p->page->getBytesNoCopy();
+        memset(p->p, 0, 0x1000);
+        p->pa = p->page->getPhysicalAddress();
         return 0;
 }
 
 void
 free_vmpage(vmpage_t *p)
 {
+        p->page->complete();
+        p->page->release();
+        p->page = NULL;
+        p->p = NULL;
+        p->pa = 0;
 }
 
 int

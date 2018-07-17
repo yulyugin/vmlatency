@@ -20,21 +20,39 @@
 
 #include "types.h"
 
+/* Define IOBufferMemoryDescriptor for C code.
+ * API is implemented in C++, but vm_page_t is used in C.
+ * Let's define IOBufferMemoryOperation as void for C to make it compilable. */
+#ifdef __APPLE__
+#ifdef __cplusplus
+#include <IOKit/IOBufferMemoryDescriptor.h>
+#else
+typedef void IOBufferMemoryDescriptor;
+#endif
+#endif
+
 typedef struct vmpage {
-        struct page *page;
         char *p;
         uintptr_t pa;
+#ifdef __linux__
+    struct page *page;
+#else
+#ifdef __APPLE__
+    IOBufferMemoryDescriptor *page;
+#else  /* Windows */
+#endif
+#endif
 } vmpage_t;
 
 typedef unsigned long irq_flags_t;
 
-int allocate_vmpage(vmpage_t *p);
-void free_vmpage(vmpage_t *p);
+CLINKAGE int allocate_vmpage(vmpage_t *p);
+CLINKAGE void free_vmpage(vmpage_t *p);
 
-void vmlatency_preempt_disable(irq_flags_t *irq_flags);
-void vmlatency_preempt_enable(irq_flags_t irq_flags);
+CLINKAGE void vmlatency_preempt_disable(irq_flags_t *irq_flags);
+CLINKAGE void vmlatency_preempt_enable(irq_flags_t irq_flags);
 
-int vmlatency_printm(const char *fmt, ...);
+CLINKAGE int vmlatency_printm(const char *fmt, ...);
 
 #define vmlatency_printk(...) vmlatency_printm("[vmlatency] " __VA_ARGS__)
 

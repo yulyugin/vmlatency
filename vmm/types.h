@@ -31,7 +31,6 @@ typedef _Bool bool;
 #define true 1
 #define false 0
 #endif
-
 #elif __APPLE__
 #include <mach/mach_types.h>
 
@@ -53,5 +52,11 @@ typedef unsigned __int64 u64;
 
 #define inline __inline
 #endif  /* Windows */
+
+#ifdef __cplusplus
+#define CLINKAGE extern "C"
+#else
+#define CLINKAGE
+#endif
 
 #endif /* __TYPES_H__ */

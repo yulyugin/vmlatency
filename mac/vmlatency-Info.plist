@@ -22,7 +22,11 @@
 	<string>Copyright © 2018 Evgeny Yulyugin. All rights reserved.</string>
     <key>OSBundleLibraries</key>
     <dict>
+        <key>com.apple.kpi.iokit</key>
+        <string>17.5</string>
         <key>com.apple.kpi.libkern</key>
+        <string>17.5</string>
+        <key>com.apple.kpi.mach</key>
         <string>17.5</string>
     </dict>
 </dict>
