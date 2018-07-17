@@ -15,10 +15,20 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
-#include <stdarg.h>
 #include <sys/systm.h>
 
 #include "api.h"
+
+int
+allocate_vmpage(vmpage_t *p)
+{
+        return 0;
+}
+
+void
+free_vmpage(vmpage_t *p)
+{
+}
 
 int
 vmlatency_printm(const char *fmt, ...)
@@ -26,7 +36,18 @@ vmlatency_printm(const char *fmt, ...)
         int ret;
         va_list va;
         va_start(va, fmt);
-        ret = printf(fmt, va);
+        ret = vprintf(fmt, va);
         va_end(va);
         return ret;
+}
+
+unsigned long
+vmlatency_get_cpu(void)
+{
+        return 0;
+}
+
+void
+vmlatency_put_cpu(unsigned long irq_flags)
+{
 }
