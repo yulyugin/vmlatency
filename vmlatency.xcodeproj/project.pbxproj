@@ -17,8 +17,8 @@
 
 /* Begin PBXFileReference section */
 		BA8B2E6C20E507B100E06EE8 /* vmm */ = {isa = PBXFileReference; lastKnownFileType = folder; path = vmm; sourceTree = "<group>"; };
-		BA8B2E6E20E50BD800E06EE8 /* api.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = api.c; sourceTree = "<group>"; };
-		BA8B2E7220EB966500E06EE8 /* vmx.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; name = vmx.c; path = vmm/vmx.c; sourceTree = SOURCE_ROOT; };
+		BA8B2E6E20E50BD800E06EE8 /* api.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.c.c; path = api.c; sourceTree = "<group>"; tabWidth = 8; };
+		BA8B2E7220EB966500E06EE8 /* vmx.c */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 8; lastKnownFileType = sourcecode.c.c; name = vmx.c; path = vmm/vmx.c; sourceTree = SOURCE_ROOT; tabWidth = 8; };
 		BA8B2E7420FDEFE700E06EE8 /* guest.s */ = {isa = PBXFileReference; indentWidth = 8; lastKnownFileType = sourcecode.asm; path = guest.s; sourceTree = "<group>"; tabWidth = 8; };
 		BA8B2E7620FDF21600E06EE8 /* vmentry.s */ = {isa = PBXFileReference; indentWidth = 8; lastKnownFileType = sourcecode.asm; path = vmentry.s; sourceTree = "<group>"; tabWidth = 8; };
 		BA91ABFC20E27C5500C6BC71 /* vmlatency.kext */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = vmlatency.kext; sourceTree = BUILT_PRODUCTS_DIR; };

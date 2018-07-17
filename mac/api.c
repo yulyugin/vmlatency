@@ -23,10 +23,10 @@
 int
 vmlatency_printm(const char *fmt, ...)
 {
-    int ret;
-    va_list va;
-    va_start(va, fmt);
-    ret = printf(fmt, va);
-    va_end(va);
-    return ret;
+        int ret;
+        va_list va;
+        va_start(va, fmt);
+        ret = printf(fmt, va);
+        va_end(va);
+        return ret;
 }
