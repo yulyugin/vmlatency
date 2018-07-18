@@ -200,8 +200,13 @@ __vmxon(uintptr_t vmxon_region_pa)
                 "vmxon %1;"
                 SAVE_RFLAGS(rflags)
                 :"m"(vmxon_region_pa));
-        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
-                return -1;
+
+        rflags &= RFLAGS_CF | RFLAGS_ZF;
+        if (rflags == RFLAGS_CF)
+                return -1;  /* VMXON failed */
+        if (rflags == (RFLAGS_CF | RFLAGS_ZF))
+                return 1;  /* VMX is already on */
+
         return 0;
 }
 
