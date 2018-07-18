@@ -449,7 +449,7 @@ measure_vmlatency()
         vm_monitor_t vmm = {0};
         int cnt;  /* error counter for memory allocation */
         int i, n;  /* loop counters */
-        unsigned long irq_flags;
+        irq_flags_t irq_flags;
         u64 start, end;
         extern char vmx_exit[];  /* assembly export */
         u64 rsp;
@@ -464,7 +464,7 @@ measure_vmlatency()
         vmcs_setup_revision_id(&vmm);
 
         /* Disable interrupts */
-        irq_flags = vmlatency_get_cpu();
+        vmlatency_preempt_disable(&irq_flags);
 
         do_vmxon(&vmm);
         if (do_vmptrld(&vmm) != 0)
@@ -505,7 +505,7 @@ out2:
         do_vmxoff(&vmm);
 
         /* Enable interrupts */
-        vmlatency_put_cpu(irq_flags);
+        vmlatency_preempt_enable(irq_flags);
 out1:
         free_memory(&vmm, cnt);
 }

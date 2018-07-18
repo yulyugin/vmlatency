@@ -26,11 +26,13 @@ typedef struct vmpage {
         uintptr_t pa;
 } vmpage_t;
 
+typedef unsigned long irq_flags_t;
+
 int allocate_vmpage(vmpage_t *p);
 void free_vmpage(vmpage_t *p);
 
-unsigned long vmlatency_get_cpu(void);
-void vmlatency_put_cpu(unsigned long irq_flags);
+void vmlatency_preempt_disable(irq_flags_t *irq_flags);
+void vmlatency_preempt_enable(irq_flags_t irq_flags);
 
 int vmlatency_printm(const char *fmt, ...);
 

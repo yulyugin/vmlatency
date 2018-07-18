@@ -41,13 +41,12 @@ vmlatency_printm(const char *fmt, ...)
         return ret;
 }
 
-unsigned long
-vmlatency_get_cpu(void)
+void
+vmlatency_preempt_disable(irq_flags_t *irq_flags)
 {
-        return 0;
 }
 
 void
-vmlatency_put_cpu(unsigned long irq_flags)
+vmlatency_preempt_enable(irq_flags_t irq_flags)
 {
 }
