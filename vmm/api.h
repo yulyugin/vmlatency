@@ -20,31 +20,41 @@
 
 #include "types.h"
 
-/* Define IOBufferMemoryDescriptor for C code.
- * API is implemented in C++, but vm_page_t is used in C.
- * Let's define IOBufferMemoryOperation as void for C to make it compilable. */
 #ifdef __APPLE__
+#include <IOKit/IOLocks.h>
 #ifdef __cplusplus
 #include <IOKit/IOBufferMemoryDescriptor.h>
 #else
+/* Define IOBufferMemoryDescriptor for C code.
+ * API is implemented in C++, but vm_page_t is used in C.
+ * Define IOBufferMemoryOperation as void for C to make it compilable. */
 typedef void IOBufferMemoryDescriptor;
 #endif
 #endif
 
 typedef struct vmpage {
+        /* public fields */
         char *p;
         uintptr_t pa;
+
+        /* private fields */
 #ifdef __linux__
     struct page *page;
-#else
-#ifdef __APPLE__
-    IOBufferMemoryDescriptor *page;
+#elif defined(__APPLE__)
+        IOBufferMemoryDescriptor *page;
 #else  /* Windows */
-#endif
 #endif
 } vmpage_t;
 
+#ifdef __linux__
 typedef unsigned long irq_flags_t;
+#elif defined(__APPLE__)
+typedef struct irq_flags {
+        IOSimpleLock *lock;
+        IOInterruptState interrupt_state;
+} irq_flags_t;
+#else  /* Windows */
+#endif
 
 CLINKAGE int allocate_vmpage(vmpage_t *p);
 CLINKAGE void free_vmpage(vmpage_t *p);
