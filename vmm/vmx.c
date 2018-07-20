@@ -146,6 +146,7 @@ get_segment_ar(u16 seg)
 static inline void
 initialize_vmcs(vm_monitor_t *vmm)
 {
+        extern char vmx_exit[];  /* assembly export */
         u16 val16, tr, tr_limit;
         descriptor_t gdtr, idtr;
         u64 fs_base, gs_base;
@@ -299,6 +300,13 @@ initialize_vmcs(vm_monitor_t *vmm)
         /* Natural-width guest/host state */
         __vmwrite(VMCS_GUEST_DR7, 0x400); /* Initial value */
 
+        /* Don't care about guest stack, because we exit immediately */
+        __vmwrite(VMCS_GUEST_RSP, 0);
+        /* Host stack pointer is saved just before vmentry */
+
+        __vmwrite(VMCS_GUEST_RIP, (uintptr_t)&guest_code);
+        __vmwrite(VMCS_HOST_RIP, (uintptr_t)vmx_exit);
+
         rflags = __get_rflags();
         __vmwrite(VMCS_GUEST_RFLAGS, rflags);
 
@@ -451,8 +459,6 @@ measure_vmlatency()
         int i, n;  /* loop counters */
         irq_flags_t irq_flags;
         u64 start, end;
-        extern char vmx_exit[];  /* assembly export */
-        u64 rsp;
 
         cache_vmx_capabilities(&vmm);
 
@@ -471,16 +477,6 @@ measure_vmlatency()
                 goto out2;
 
         initialize_vmcs(&vmm);
-
-        rsp = __get_rsp();
-        /* Return address will be pushed to stack by call instruction in
-         * do_vmlaunch or do_vmresume, adjust rsp to reflect that */
-        rsp -= 8;
-        __vmwrite(VMCS_GUEST_RSP, rsp);
-        __vmwrite(VMCS_HOST_RSP, rsp);
-
-        __vmwrite(VMCS_GUEST_RIP, (uintptr_t)&guest_code);
-        __vmwrite(VMCS_HOST_RIP, (uintptr_t)vmx_exit);
 
         if (do_vmlaunch() != 0) {
                 vmlatency_printk("VMLAUNCH failed\n");

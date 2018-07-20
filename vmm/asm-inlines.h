@@ -271,17 +271,6 @@ __get_tsc(void)
         return ((u64)edx << 32) | eax;
 }
 
-static noinline u64
-__get_rsp(void)
-{
-        u64 rsp;
-        __asm__ __volatile__("mov %%rsp, %0":"=r"(rsp));
-        /* discard a return address of the function from stack
-         * to get a caller stack pointer */
-        rsp += 8;
-        return rsp;
-}
-
 static inline u64
 __get_rflags(void)
 {
@@ -289,6 +278,7 @@ __get_rflags(void)
         __asm__ __volatile__(SAVE_RFLAGS(rflags));
         return rflags;
 }
+
 #else  /* !__GNUC__ */
 
 extern void __cpuid_all(u32 l, u32 subl, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx);
@@ -325,7 +315,6 @@ extern u64 __vmread(u64 field);
 
 extern u64 __get_tsc(void);
 
-extern u64 __get_rsp(void);
 extern u64 __get_rflags(void);
 
 #endif /* !__GNUC__ */

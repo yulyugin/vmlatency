@@ -15,15 +15,25 @@
  * along with this program. If not, see <http://www.gnu.org/licenses/>.
  */
 
+#include "cpu-defs.h"
+
 .text
+
+.macro vmentry_prepare
+        // save stack pointer
+        mov     $(VMCS_HOST_RSP), %rax
+        vmwrite %rsp, %rax
+.endm
 
 .globl _do_vmlaunch
 _do_vmlaunch:
+        vmentry_prepare
         vmlaunch
         jmp entry_error
 
 .globl _do_vmresume
 _do_vmresume:
+        vmentry_prepare
         vmresume
         /* fall through */
 
