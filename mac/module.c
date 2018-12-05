@@ -29,6 +29,7 @@ kern_return_t vmlatency_start(kmod_info_t * ki, void *d)
 
         print_vmx_info();
 
+        measure_vmlatency();
         return KERN_SUCCESS;
 }
 
