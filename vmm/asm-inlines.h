@@ -179,9 +179,21 @@ __get_gdt(descriptor_t *gdtr)
 }
 
 static inline void
+__set_gdt(descriptor_t *gdtr)
+{
+        __asm__ __volatile__("lgdt %0"::"m"(*gdtr));
+}
+
+static inline void
 __get_idt(descriptor_t *idtr)
 {
         __asm__ __volatile__("sidt %0":"=m"(*idtr));
+}
+
+static inline void
+__set_idt(descriptor_t *idtr)
+{
+        __asm__ __volatile__("lidt %0"::"m"(*idtr));
 }
 
 static inline u16

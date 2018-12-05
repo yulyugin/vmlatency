@@ -22,6 +22,25 @@
 
 extern void guest_code(void);
 
+typedef struct {
+    descriptor_t gdt;
+    descriptor_t idt;
+} host_state_t;
+
+static void
+save_host_state(host_state_t *s)
+{
+        __get_gdt(&s->gdt);
+        __get_idt(&s->idt);
+}
+
+static void
+restore_host_state(host_state_t *s)
+{
+        __set_gdt(&s->gdt);
+        __set_idt(&s->idt);
+}
+
 static inline int
 allocate_memory(vm_monitor_t *vmm)
 {
@@ -466,6 +485,7 @@ measure_vmlatency()
         int i, n;  /* loop counters */
         irq_flags_t irq_flags;
         u64 start, end;
+        host_state_t  hs;
 
         cache_vmx_capabilities(&vmm);
 
@@ -486,6 +506,7 @@ measure_vmlatency()
                 goto out3;
 
         initialize_vmcs(&vmm);
+        save_host_state(&hs);
 
         if (do_vmlaunch() != 0) {
                 vmlatency_printk("VMLAUNCH failed\n");
@@ -505,6 +526,7 @@ measure_vmlatency()
         }
 
 out4:
+        restore_host_state(&hs);
         do_vmclear(&vmm);
 out3:
         do_vmxoff(&vmm);
