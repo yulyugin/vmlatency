@@ -268,7 +268,8 @@
 		BA91AC0520E27C5500C6BC71 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
 				INFOPLIST_FILE = "mac/vmlatency-Info.plist";
 				MODULE_NAME = com.vmlatency;
 				MODULE_START = vmlatency_start;
@@ -286,7 +287,8 @@
 		BA91AC0620E27C5500C6BC71 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				CODE_SIGN_STYLE = Automatic;
+				CODE_SIGN_IDENTITY = "";
+				CODE_SIGN_STYLE = Manual;
 				INFOPLIST_FILE = "mac/vmlatency-Info.plist";
 				MODULE_NAME = com.vmlatency;
 				MODULE_START = vmlatency_start;
