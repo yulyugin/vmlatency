@@ -31,7 +31,7 @@ typedef _Bool bool;
 #define true 1
 #define false 0
 #endif
-#elif __APPLE__
+#elif defined(__APPLE__)
 #include <mach/mach_types.h>
 
 typedef uint16_t u16;
