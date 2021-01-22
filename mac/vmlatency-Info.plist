@@ -19,7 +19,7 @@
 	<key>CFBundleVersion</key>
 	<string>1</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright © 2018 Evgeny Yulyugin. All rights reserved.</string>
+	<string>Copyright © 2018 Evgenii Iuliugin. All rights reserved.</string>
     <key>OSBundleLibraries</key>
     <dict>
         <key>com.apple.kpi.iokit</key>

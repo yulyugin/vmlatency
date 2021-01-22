@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Evgeny Yulyugin
+ * Copyright (c) 2017 Evgenii Iuliugin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
@@ -20,7 +20,7 @@
 #include "vmx.h"
 
 MODULE_LICENSE("GPL");
-MODULE_AUTHOR("Evgeny Yulyugin <yulyugin@gmail.com>");
+MODULE_AUTHOR("Evgenii Iuliugin <yulyugin@gmail.com>");
 MODULE_DESCRIPTION("vmlatency");
 
 static int __init

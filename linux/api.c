@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2017 Evgeny Yulyugin
+ * Copyright (c) 2017 Evgenii Iuliugin
  *
  * This program is free software: you can redistribute it and/or modify
  * it under the terms of the GNU General Public License as published by
