@@ -56,13 +56,21 @@ typedef struct irq_flags {
 #else  /* Windows */
 #endif
 
-CLINKAGE int allocate_vmpage(vmpage_t *p);
-CLINKAGE void free_vmpage(vmpage_t *p);
+#ifdef __cplusplus
+extern "C" {
+#endif
 
-CLINKAGE void vmlatency_preempt_disable(irq_flags_t *irq_flags);
-CLINKAGE void vmlatency_preempt_enable(irq_flags_t irq_flags);
+int allocate_vmpage(vmpage_t *p);
+void free_vmpage(vmpage_t *p);
 
-CLINKAGE int vmlatency_printm(const char *fmt, ...);
+void vmlatency_preempt_disable(irq_flags_t *irq_flags);
+void vmlatency_preempt_enable(irq_flags_t irq_flags);
+
+int vmlatency_printm(const char *fmt, ...);
+
+#ifdef __cplusplus
+}
+#endif
 
 #define vmlatency_printk(...) vmlatency_printm("[vmlatency] " __VA_ARGS__)
 

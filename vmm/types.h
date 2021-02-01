@@ -53,10 +53,4 @@ typedef unsigned __int64 u64;
 #define inline __inline
 #endif  /* Windows */
 
-#ifdef __cplusplus
-#define CLINKAGE extern "C"
-#else
-#define CLINKAGE
-#endif
-
 #endif /* __TYPES_H__ */
