@@ -63,8 +63,8 @@ vmlatency_preempt_disable(unsigned long *irq_flags)
 }
 
 void
-vmlatency_preempt_enable(unsigned long irq_flags)
+vmlatency_preempt_enable(unsigned long *irq_flags)
 {
-        local_irq_restore(irq_flags);
+        local_irq_restore(*irq_flags);
         preempt_enable();
 }

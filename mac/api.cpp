@@ -74,10 +74,10 @@ vmlatency_preempt_disable(irq_flags_t *irq_flags)
 }
 
 void
-vmlatency_preempt_enable(irq_flags_t irq_flags)
+vmlatency_preempt_enable(irq_flags_t *irq_flags)
 {
-        IOSimpleLockUnlockEnableInterrupt(irq_flags.lock,
-                                          irq_flags.interrupt_state);
-        IOSimpleLockFree(irq_flags.lock);
-        irq_flags.lock = NULL;
+        IOSimpleLockUnlockEnableInterrupt(irq_flags->lock,
+                                          irq_flags->interrupt_state);
+        IOSimpleLockFree(irq_flags->lock);
+        irq_flags->lock = NULL;
 }

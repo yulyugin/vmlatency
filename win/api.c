@@ -41,8 +41,8 @@ vmlatency_preempt_disable(irq_flags_t *irq_flags)
 }
 
 void
-vmlatency_preempt_enable(irq_flags_t irq_flags)
+vmlatency_preempt_enable(irq_flags_t *irq_flags)
 {
-        __writeeflags(irq_flags.eflags);
-        KeLowerIrql(irq_flags.irql);
+        __writeeflags(irq_flags->eflags);
+        KeLowerIrql(irq_flags->irql);
 }

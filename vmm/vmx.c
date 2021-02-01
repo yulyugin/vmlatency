@@ -532,7 +532,7 @@ out3:
         do_vmxoff(&vmm);
 out2:
         /* Enable interrupts */
-        vmlatency_preempt_enable(irq_flags);
+        vmlatency_preempt_enable(&irq_flags);
 out1:
         free_memory(&vmm, cnt);
 }
