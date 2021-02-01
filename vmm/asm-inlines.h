@@ -320,7 +320,9 @@ extern u16 __lsl(u16 seg);
 
 extern u16 __sldt(void);
 extern void __get_gdt(descriptor_t *gdt);
+extern void __set_gdt(descriptor_t *gdt);
 extern void __get_idt(descriptor_t *idt);
+extern void __set_idt(descriptor_t *idt);
 extern u16 __str(void);
 
 extern int __vmxon(uintptr_t vmxon_region_pa);
