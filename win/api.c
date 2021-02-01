@@ -31,3 +31,18 @@ vmlatency_printm(const char *fmt, ...)
     va_end(va);
     return 0;
 }
+
+void
+vmlatency_preempt_disable(irq_flags_t *irq_flags)
+{
+        irq_flags->irql = KeRaiseIrqlToDpcLevel();
+        irq_flags->eflags = __readeflags();
+        _disable();
+}
+
+void
+vmlatency_preempt_enable(irq_flags_t irq_flags)
+{
+        __writeeflags(irq_flags.eflags);
+        KeLowerIrql(irq_flags.irql);
+}

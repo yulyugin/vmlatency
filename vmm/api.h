@@ -54,6 +54,10 @@ typedef struct irq_flags {
         IOInterruptState interrupt_state;
 } irq_flags_t;
 #else  /* Windows */
+typedef struct irq_flags {
+        unsigned __int64 eflags;
+        KIRQL irql;
+} irq_flags_t;
 #endif
 
 #ifdef __cplusplus
