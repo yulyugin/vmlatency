@@ -19,7 +19,8 @@ Supported commands:
 #>
 
 Param (
-    [ValidateSet("build", "measure")][String]$Command = "measure"
+    [ValidateSet("build", "measure")][String]$Command = "measure",
+    [Switch]$UseICC=$False
 )
 
 $VmlatencyRoot = Split-Path -Parent -Path $Script:MyInvocation.MyCommand.Definition
@@ -30,6 +31,9 @@ Function Build([String]$Component) {
 
     $Cmds  = "/C"
     $Cmds += " $WDKRoot\bin\setenv.bat $WDKRoot fre x64 WIN7"
+    If ($Script:ICCPath) {
+        $Cmds += " & set SUBSTITUTE_AMD64_CC=`"$Script:ICCPath`""
+    }
     $Cmds += " & cd /d $VmlatencyRoot\$Component"
     $Cmds += " & build /cfFgwb"
 
@@ -80,6 +84,21 @@ Function SetupBuildEnvironment() {
     If (-Not (Test-Path $WDKRoot)) {
         Echo "*** Windows Driver Kit Version 7 is not found"
         Exit 1
+    }
+    Echo "Using WDK='$WDKRoot'"
+
+    If ($UseICC) {
+        ForEach ($ICC in Get-Item Env:ICPP_COMPILER*) {
+            If ($LatestICC.name -lt $ICC.name) { $LatestICC = $ICC }
+        }
+
+        If (-Not $LatestICC) {
+            Echo "ICC not found"
+            Exit 1
+        }
+
+        $Script:ICCPath = $LatestICC.value + "\bin\intel64\icl.exe"
+        Echo "Using ICC='$Script:ICCPath'"
     }
 }
 
