@@ -33,6 +33,9 @@ Function Build([String]$Component) {
     $Cmds += " $WDKRoot\bin\setenv.bat $WDKRoot fre x64 WIN7"
     If ($Script:ICCPath) {
         $Cmds += " & set SUBSTITUTE_AMD64_CC=`"$Script:ICCPath`""
+        # Disable Inter-Procedural Optimization (IPO). Windows linker does not
+        # support link time optimizable objects produced with this optimization
+        $Cmds += " & set USER_C_FLAGS=/Qipo-"
     }
     $Cmds += " & cd /d $VmlatencyRoot\$Component"
     $Cmds += " & build /cfFgwb"
