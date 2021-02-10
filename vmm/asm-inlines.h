@@ -28,7 +28,7 @@ typedef struct {
 } descriptor_t;
 #pragma pack(pop)
 
-#ifdef __GNUC__
+#if defined(__GNUC__) || defined(__INTEL_COMPILER)
 
 #define SAVE_RFLAGS(rflags) \
         "pushfq;"           \
