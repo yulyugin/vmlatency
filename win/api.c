@@ -46,3 +46,36 @@ vmlatency_preempt_enable(irq_flags_t *irq_flags)
         __writeeflags(irq_flags->eflags);
         KeLowerIrql(irq_flags->irql);
 }
+
+int
+allocate_vmpage(vmpage_t *p)
+{
+        PHYSICAL_ADDRESS Low, High, Skip;
+        Low.QuadPart = 0;
+        High.QuadPart = ~0ULL;
+        Skip.QuadPart = 0;
+        p->mdl = MmAllocatePagesForMdlEx(Low, High, Skip, PAGE_SIZE,
+                                         MmCached, 0);
+        if (!p->mdl)
+                return -1;
+
+        p->p = MmMapLockedPagesSpecifyCache(p->mdl, KernelMode, MmCached, NULL,
+                                            FALSE, NormalPagePriority);
+        if (!p->p) {
+                MmFreePagesFromMdl(p->mdl);
+                return -1;
+        }
+
+        p->pa = MmGetMdlPfnArray(&p->mdl)[0] << PAGE_SHIFT;
+        return 0;
+}
+
+void
+free_vmpage(vmpage_t *p)
+{
+        MmUnmapLockedPages(p->p, p->mdl);
+        MmFreePagesFromMdl(p->mdl);
+        p->mdl = NULL;
+        p->p = NULL;
+        p->pa = 0;
+}

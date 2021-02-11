@@ -32,6 +32,10 @@ typedef void IOBufferMemoryDescriptor;
 #endif
 #endif
 
+#ifdef WIN32
+#include <wdm.h>
+#endif
+
 typedef struct vmpage {
         /* public fields */
         char *p;
@@ -43,6 +47,7 @@ typedef struct vmpage {
 #elif defined(__APPLE__)
         IOBufferMemoryDescriptor *page;
 #else  /* Windows */
+        MDL *mdl;
 #endif
 } vmpage_t;
 
