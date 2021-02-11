@@ -26,8 +26,7 @@ vmlatency_printm(const char *fmt, ...)
 {
     va_list va;
     va_start(va, fmt);
-    vDbgPrintExWithPrefix("[vmlatency] ", DPFLTR_IHVDRIVER_ID,
-                          DPFLTR_INFO_LEVEL, fmt, va);
+    vDbgPrintExWithPrefix("", DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, fmt, va);
     va_end(va);
     return 0;
 }
