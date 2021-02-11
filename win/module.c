@@ -18,6 +18,7 @@
 #include <ntddk.h>
 
 #include "api.h"
+#include "vmx.h"
 
 #define NT_DEVICE_NAME  L"\\Device\\VMLATENCY"
 
@@ -48,6 +49,8 @@ DriverEntry(__in PDRIVER_OBJECT DriverObject,
         }
 
         DriverObject->DriverUnload = VmlatencyUnloadDriver;
+
+        print_vmx_info();
 
         return ntStatus;
 }
