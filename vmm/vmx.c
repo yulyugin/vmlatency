@@ -251,7 +251,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_HOST_TR, tr);
         __vmwrite(VMCS_GUEST_TR_LIMIT, tr_limit);
         __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, get_segment_ar(tr));
-        /* Extracting TR.base for GDT */
+        /* Extracting TR.base from GDT */
         trdesc_lo = ((u64*)(gdtr.base + tr))[0];
         trbase = ((trdesc_lo >> 16) & 0xffffff)
                | (((trdesc_lo >> 56) & 0xff) << 24);
