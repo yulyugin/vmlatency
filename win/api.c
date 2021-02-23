@@ -65,7 +65,7 @@ allocate_vmpage(vmpage_t *p)
                 return -1;
         }
 
-        p->pa = MmGetMdlPfnArray(&p->mdl)[0] << PAGE_SHIFT;
+        p->pa = MmGetMdlPfnArray(p->mdl)[0] << PAGE_SHIFT;
         return 0;
 }
 
