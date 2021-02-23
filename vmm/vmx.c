@@ -184,35 +184,35 @@ initialize_vmcs(vm_monitor_t *vmm)
 
         /* Segment registers */
         val16 = __get_es();
-        __vmwrite(VMCS_HOST_ES, val16);
+        __vmwrite(VMCS_HOST_ES, val16 & ~7);
         __vmwrite(VMCS_GUEST_ES, val16);
         __vmwrite(VMCS_GUEST_ES_BASE, 0);
         __vmwrite(VMCS_GUEST_ES_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS, UNUSABLE_AR);
 
         val16 = __get_cs();
-        __vmwrite(VMCS_HOST_CS, val16);
+        __vmwrite(VMCS_HOST_CS, val16 & ~7);
         __vmwrite(VMCS_GUEST_CS, val16);
         __vmwrite(VMCS_GUEST_CS_BASE, 0);
         __vmwrite(VMCS_GUEST_CS_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, get_segment_ar(val16));
 
         val16 = __get_ss();
-        __vmwrite(VMCS_HOST_SS, val16);
+        __vmwrite(VMCS_HOST_SS, val16 & ~7);
         __vmwrite(VMCS_GUEST_SS, val16);
         __vmwrite(VMCS_GUEST_SS_BASE, 0);
         __vmwrite(VMCS_GUEST_SS_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, get_segment_ar(val16));
 
         val16 = __get_ds();
-        __vmwrite(VMCS_HOST_DS, val16);
+        __vmwrite(VMCS_HOST_DS, val16 & ~7);
         __vmwrite(VMCS_GUEST_DS, val16);
         __vmwrite(VMCS_GUEST_DS_BASE, 0);
         __vmwrite(VMCS_GUEST_DS_LIMIT, 0xffffffff);
         __vmwrite(VMCS_GUEST_DS_ACCESS_RIGHTS, UNUSABLE_AR);
 
         val16 = __get_fs();
-        __vmwrite(VMCS_HOST_FS, val16);
+        __vmwrite(VMCS_HOST_FS, val16 & ~7);
         __vmwrite(VMCS_GUEST_FS, val16);
         fs_base = __rdmsr(IA32_FS_BASE);
         __vmwrite(VMCS_GUEST_FS_BASE, fs_base);
@@ -221,7 +221,7 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_FS_ACCESS_RIGHTS, UNUSABLE_AR);
 
         val16 = __get_gs();
-        __vmwrite(VMCS_HOST_GS, val16);
+        __vmwrite(VMCS_HOST_GS, val16 & ~7);
         __vmwrite(VMCS_GUEST_GS, val16);
         gs_base = __rdmsr(IA32_GS_BASE);
         __vmwrite(VMCS_GUEST_GS_BASE, gs_base);
@@ -247,7 +247,7 @@ initialize_vmcs(vm_monitor_t *vmm)
 
         tr = __str();
         tr_limit = __lsl(tr);
-        __vmwrite(VMCS_GUEST_TR, tr);
+        __vmwrite(VMCS_GUEST_TR, tr & ~7);
         __vmwrite(VMCS_HOST_TR, tr);
         __vmwrite(VMCS_GUEST_TR_LIMIT, tr_limit);
         __vmwrite(VMCS_GUEST_TR_ACCESS_RIGHTS, get_segment_ar(tr));
