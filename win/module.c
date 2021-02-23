@@ -51,6 +51,7 @@ DriverEntry(__in PDRIVER_OBJECT DriverObject,
         DriverObject->DriverUnload = VmlatencyUnloadDriver;
 
         print_vmx_info();
+        measure_vmlatency();
 
         return ntStatus;
 }
