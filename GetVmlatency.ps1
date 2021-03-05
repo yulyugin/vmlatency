@@ -16,15 +16,22 @@ Supported commands:
 
 "measure"  Default. Build vmatency kernel driver and measure VM-Entry and
            VM-Exit turnaround time.
+
+"set-testsigning"    Switch current host to test mode and create self-signed
+                     certificate.
+
+"clean-testsigning"  Revert changes made by "set-testsigning" command.
 #>
 
 Param (
-    [ValidateSet("build", "measure")][String]$Command = "measure",
+    [ValidateSet("build", "measure", "set-testsigning",
+                 "clean-testsigning")][String]$Command = "measure",
     [Switch]$UseICC=$False
 )
 
 $VmlatencyRoot = Split-Path -Parent -Path $Script:MyInvocation.MyCommand.Definition
 $WDKRoot = "C:\WinDDK\7600.16385.1"
+$CertificateSubject = "VmlatencyTestCertificate"
 
 Function Build([String]$Component) {
     Echo "Building Vmlatency ($Component)"
@@ -64,6 +71,7 @@ Function Load-Vmlatency() {
     } catch {
         Echo "*** Failed to start vmlatency service"
         Echo "*** Look at system logs for more information"
+        Unload-Vmlatency
         Exit 1
     }
 }
@@ -105,12 +113,112 @@ Function SetupBuildEnvironment() {
     }
 }
 
-SetupBuildEnvironment
+Function Sign([String]$File) {
+    $SignTool = "$WDKRoot\bin\amd64\SignTool.exe"
+    $Args =  " sign /t http://timestamp.digicert.com"
+    $Args += " /n $CertificateSubject"
+    $Args += " $File"
 
-Build vmm
-Build win
+    Echo "Signing $File"
+    $P = (Start-Process $SignTool -ArgumentList $Args -NoNewWindow -PassThru)
+    $P.WaitForExit()
+    If ($P.ExitCode -Eq 1) {
+       Echo "*** Failed to sign $File"
+       Exit 1
+    }
+}
 
-If ($Command -Eq "measure") {
-    Load-Vmlatency
-    Unload-Vmlatency
+Function SetupSelfSigning() {
+    Foreach ($c in (Get-ChildItem -Path "Cert:\CurrentUser\My")) {
+        If ($c.Subject -Eq "CN=$CertificateSubject") {
+            $t = $c.Thumbprint;
+            Break
+        }
+    }
+
+    If ($t) {
+        Echo "Self-signed certificate for vmlatency $t already exists."
+    } Else {
+        $Param = @{
+            'CertStoreLocation' = "Cert:\CurrentUser\My"
+            'Subject' = "CN=$CertificateSubject"
+            'Type' = "CodeSigningCert"
+        }
+        $c = New-SelfSignedCertificate @Param
+        If (-Not $c) {
+            Echo "Failed to create self-signed certificate."
+            Exit 1
+        }
+        Echo ("Self-signed certificate " + $c.Thumbprint + " created.")
+    }
+
+    SetTestsigning "ON"
+}
+
+Function CleanupSelfSigning() {
+    SetTestsigning "OFF"
+
+    Foreach ($c in (Get-ChildItem -Path "Cert:\" -Recurse)) {
+        If ($c.Subject -Eq "CN=VmlatencyTestCertificate") { Rm $c.PsPath }
+    }
+}
+
+Function SetTestsigning($Value) {
+    $CheckTestSigningCmd = "bcdedit.exe /v | Select-String testsigning"
+    $CheckTestSigningCmd += " | Select-String Yes"
+    $SetTestSigningCmd = "bcdedit.exe /set testsigning $Value"
+
+    $ExitUnchanged = 104
+    $ExitReboot = 1077
+    $Change = "{ $SetTestSigningCmd; Exit $ExitReboot }"
+    $AlreadySet = "{ Exit $ExitUnchanged }"
+
+    If ($Value -Eq "ON") {
+        $Cmd = "If ($CheckTestSigningCmd) $AlreadySet Else $Change"
+    } ElseIf ($Value -Eq "OFF") {
+        $Cmd = "If ($CheckTestSigningCmd) $Change Else $AlreadySet"
+    } Else {
+        Echo "Unsupported testsigning value $Value."
+        Exit 1
+    }
+
+    $Param = @{
+        'Verb' = 'runAs'
+        'ArgumentList' = "$Cmd"
+        'WindowStyle' = 'Hidden'
+    }
+    $p = (Start-Process powershell @Param -PassThru)
+    $p.WaitForExit()
+
+    If (-Not $p){
+        Echo "Failed to elevate"
+        Exit 0
+    }
+
+    If ($p.ExitCode -Eq $ExitUnchanged) {
+        Echo "Testsigning mode is already $Value."
+    } ElseIf ($p.ExitCode -Eq $ExitReboot) {
+        Echo "Testsigning mode changed to $Value."
+        Echo "Reboot is required for the changes to take effect."
+    } Else {
+        Echo ("Failed to set testsigning to $Value. ExitCode: " + $p.ExitCode)
+        Exit 1
+    }
+}
+
+Switch ($Command) {
+    "set-testsigning" { SetupSelfSigning }
+    "clean-testsigning" { CleanupSelfSigning }
+    Default {
+        SetupBuildEnvironment
+
+        Build vmm
+        Build win
+
+        If ($Command -Eq "measure") {
+            Sign "$VmlatencyRoot\build-win7-fre\amd64\vmlatency.sys"
+            Load-Vmlatency
+            Unload-Vmlatency
+        }
+    }
 }
