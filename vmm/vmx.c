@@ -181,6 +181,8 @@ initialize_vmcs(vm_monitor_t *vmm)
         u64 ia32_sysenter_esp, ia32_sysenter_eip;
         u64 cr0, cr3, cr4;
         u64 rflags;
+        u64 segment_ar;
+        u32 segment_limit;
 
         /* Segment registers */
         val16 = __get_es();
@@ -191,18 +193,22 @@ initialize_vmcs(vm_monitor_t *vmm)
         __vmwrite(VMCS_GUEST_ES_ACCESS_RIGHTS, UNUSABLE_AR);
 
         val16 = __get_cs();
+        segment_ar = get_segment_ar(val16);
+        segment_limit = (segment_ar & __BIT(15)) ? 0xffffffff : 0xffff;
         __vmwrite(VMCS_HOST_CS, val16 & ~7);
         __vmwrite(VMCS_GUEST_CS, val16);
         __vmwrite(VMCS_GUEST_CS_BASE, 0);
-        __vmwrite(VMCS_GUEST_CS_LIMIT, 0xffffffff);
-        __vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, get_segment_ar(val16));
+        __vmwrite(VMCS_GUEST_CS_LIMIT, segment_limit);
+        __vmwrite(VMCS_GUEST_CS_ACCESS_RIGHTS, segment_ar);
 
         val16 = __get_ss();
+        segment_ar = get_segment_ar(val16);
+        segment_limit = (segment_ar & __BIT(15)) ? 0xffffffff : 0xffff;
         __vmwrite(VMCS_HOST_SS, val16 & ~7);
         __vmwrite(VMCS_GUEST_SS, val16);
         __vmwrite(VMCS_GUEST_SS_BASE, 0);
-        __vmwrite(VMCS_GUEST_SS_LIMIT, 0xffffffff);
-        __vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, get_segment_ar(val16));
+        __vmwrite(VMCS_GUEST_SS_LIMIT, segment_limit);
+        __vmwrite(VMCS_GUEST_SS_ACCESS_RIGHTS, segment_ar);
 
         val16 = __get_ds();
         __vmwrite(VMCS_HOST_DS, val16 & ~7);
