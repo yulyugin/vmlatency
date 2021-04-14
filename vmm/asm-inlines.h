@@ -222,16 +222,10 @@ __vmxon(uintptr_t vmxon_region_pa)
         return 0;
 }
 
-static inline int
+static inline void
 __vmxoff(void)
 {
-        u64 rflags;
-        __asm__ __volatile__(
-                "vmxoff;"
-                SAVE_RFLAGS(rflags));
-        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
-                return -1;
-        return 0;
+        __asm__ __volatile__("vmxoff");
 }
 
 static inline int
@@ -326,7 +320,7 @@ extern void __set_idt(descriptor_t *idt);
 extern u16 __str(void);
 
 extern int __vmxon(uintptr_t vmxon_region_pa);
-extern int __vmxoff(void);
+extern void __vmxoff(void);
 extern int __vmptrld(uintptr_t vmcs_pa);
 extern int __vmclear(uintptr_t vmcs_pa);
 extern void __vmwrite(u64 field, u64 value);

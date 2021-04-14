@@ -132,8 +132,8 @@ do_vmxon(vm_monitor_t *vmm)
 static inline void
 do_vmxoff(vm_monitor_t *vmm)
 {
-        if (vmm->our_vmxon && (__vmxoff() != 0))
-                vmlatency_printk("VMXOFF failed\n");
+        if (vmm->our_vmxon)
+                __vmxoff();
 
         /* Clear CR4.VMXE if necessary */
         if (!vmm->old_vmxe)
