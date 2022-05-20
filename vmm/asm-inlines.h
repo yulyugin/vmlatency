@@ -52,6 +52,20 @@ __vmclear(uintptr_t vmcs_pa)
 }
 
 static inline u64
+__vmread(u64 field)
+{
+        u64 ret;
+#ifdef WIN32
+        __vmx_vmread(field, &ret);
+#else
+        __asm__ __volatile__(
+                "vmread %1, %0"
+                :"=r"(ret): "r"(field));
+#endif
+        return ret;
+}
+
+static inline u64
 __get_tsc(void)
 {
 #ifdef WIN32
@@ -302,16 +316,6 @@ __vmwrite(u64 field, u64 value)
 }
 
 static inline u64
-__vmread(u64 field)
-{
-        u64 ret;
-        __asm__ __volatile__(
-                "vmread %1, %0"
-                :"=r"(ret): "r"(field));
-        return ret;
-}
-
-static inline u64
 __get_rflags(void)
 {
         u64 rflags;
@@ -346,7 +350,6 @@ extern int __vmxon(uintptr_t vmxon_region_pa);
 extern void __vmxoff(void);
 extern int __vmptrld(uintptr_t vmcs_pa);
 extern void __vmwrite(u64 field, u64 value);
-extern u64 __vmread(u64 field);
 
 extern u64 __get_rflags(void);
 
