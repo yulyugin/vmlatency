@@ -60,6 +60,28 @@ __cpuid_ecx(u32 leaf, u32 subleaf)
         :"=r"(rflags)
 
 static inline int
+__vmxon(uintptr_t vmxon_region_pa)
+{
+#ifdef WIN32
+        if (__vmx_on(&vmxon_region_pa))
+                return -1;
+#else
+        u64 rflags;
+        __asm__ __volatile__(
+                "vmxon %1;"
+                SAVE_RFLAGS(rflags)
+                :"m"(vmxon_region_pa));
+
+        rflags &= RFLAGS_CF | RFLAGS_ZF;
+        if (rflags == RFLAGS_CF)
+                return -1;  /* VMXON failed */
+        if (rflags == (RFLAGS_CF | RFLAGS_ZF))
+                return 1;  /* VMX is already on */
+#endif
+        return 0;
+}
+
+static inline int
 __vmclear(uintptr_t vmcs_pa)
 {
 #ifdef WIN32
@@ -321,24 +343,6 @@ __str(void)
         return tr;
 }
 
-static inline int
-__vmxon(uintptr_t vmxon_region_pa)
-{
-        u64 rflags;
-        __asm__ __volatile__(
-                "vmxon %1;"
-                SAVE_RFLAGS(rflags)
-                :"m"(vmxon_region_pa));
-
-        rflags &= RFLAGS_CF | RFLAGS_ZF;
-        if (rflags == RFLAGS_CF)
-                return -1;  /* VMXON failed */
-        if (rflags == (RFLAGS_CF | RFLAGS_ZF))
-                return 1;  /* VMX is already on */
-
-        return 0;
-}
-
 static inline void
 __vmxoff(void)
 {
@@ -369,7 +373,6 @@ extern void __get_gdt(descriptor_t *gdt);
 extern void __set_gdt(descriptor_t *gdt);
 extern u16 __str(void);
 
-extern int __vmxon(uintptr_t vmxon_region_pa);
 extern void __vmxoff(void);
 extern void __vmwrite(u64 field, u64 value);
 
