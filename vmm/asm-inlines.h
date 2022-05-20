@@ -223,6 +223,18 @@ static inline u64 __rdmsr(u32 msr_num)
 #endif
 }
 
+static inline u64
+__get_rflags(void)
+{
+        u64 rflags;
+#ifdef WIN32
+        rflags = __readeflags();
+#else
+        __asm__ __volatile__(SAVE_RFLAGS(rflags));
+#endif
+        return rflags;
+}
+
 #if defined(__GNUC__) || defined(__INTEL_COMPILER)
 
 static inline u16
@@ -341,14 +353,6 @@ __vmwrite(u64 field, u64 value)
                 ::"r"(field), "m"(value));
 }
 
-static inline u64
-__get_rflags(void)
-{
-        u64 rflags;
-        __asm__ __volatile__(SAVE_RFLAGS(rflags));
-        return rflags;
-}
-
 #else  /* !__GNUC__ */
 
 extern u16 __get_es(void);
@@ -368,8 +372,6 @@ extern u16 __str(void);
 extern int __vmxon(uintptr_t vmxon_region_pa);
 extern void __vmxoff(void);
 extern void __vmwrite(u64 field, u64 value);
-
-extern u64 __get_rflags(void);
 
 #endif /* !__GNUC__ */
 
