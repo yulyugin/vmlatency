@@ -28,6 +28,32 @@ typedef struct {
 } descriptor_t;
 #pragma pack(pop)
 
+static inline void
+__cpuid_all(u32 leaf, u32 subleaf, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
+{
+#ifdef WIN32
+        u32 cpuid[4];
+        __cpuidex(cpuid, leaf, subleaf);
+        *eax = cpuid[0];
+        *ebx = cpuid[1];
+        *ecx = cpuid[2];
+        *edx = cpuid[3];
+#else
+        __asm__ __volatile__(
+                "cpuid"
+                :"=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx)
+                :"a"(leaf), "c"(subleaf));
+#endif
+}
+
+static inline u32
+__cpuid_ecx(u32 leaf, u32 subleaf)
+{
+        u32 eax, ebx, ecx, edx;
+        __cpuid_all(leaf, subleaf, &eax, &ebx, &ecx, &edx);
+        return ecx;
+}
+
 #define SAVE_RFLAGS(rflags) \
         "pushfq;"           \
         "popq %0;"          \
@@ -146,23 +172,6 @@ __set_cr4(u64 cr4)
 }
 
 #if defined(__GNUC__) || defined(__INTEL_COMPILER)
-
-static inline void
-__cpuid_all(u32 leaf, u32 subleaf, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
-{
-        __asm__ __volatile__(
-                "cpuid"
-                :"=a"(*eax), "=b"(*ebx), "=c"(*ecx), "=d"(*edx)
-                :"a"(leaf), "c"(subleaf));
-}
-
-static inline u32
-__cpuid_ecx(u32 leaf, u32 subleaf)
-{
-        u32 eax, ebx, ecx, edx;
-        __cpuid_all(leaf, subleaf, &eax, &ebx, &ecx, &edx);
-        return ecx;
-}
 
 static inline u64 __rdmsr(u32 msr_num)
 {
@@ -324,9 +333,6 @@ __get_rflags(void)
 }
 
 #else  /* !__GNUC__ */
-
-extern void __cpuid_all(u32 l, u32 subl, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx);
-extern u32 __cpuid_ecx(u32 leaf, u32 subleaf);
 
 extern u64 __rdmsr(u32 msr_num);
 
