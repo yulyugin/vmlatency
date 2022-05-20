@@ -28,12 +28,31 @@ typedef struct {
 } descriptor_t;
 #pragma pack(pop)
 
-#if defined(__GNUC__) || defined(__INTEL_COMPILER)
-
 #define SAVE_RFLAGS(rflags) \
         "pushfq;"           \
         "popq %0;"          \
         :"=r"(rflags)
+
+static inline int
+__vmclear(uintptr_t vmcs_pa)
+{
+#ifdef WIN32
+        if (__vmx_vmclear(&vmcs_pa))
+                return -1;
+#else
+        u64 rflags;
+        __asm__ __volatile__(
+                "vmclear %1;"
+                SAVE_RFLAGS(rflags)
+                :"m"(vmcs_pa));
+        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
+                return -1;
+#endif
+        return 0;
+}
+
+
+#if defined(__GNUC__) || defined(__INTEL_COMPILER)
 
 static inline void
 __cpuid_all(u32 leaf, u32 subleaf, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
@@ -241,19 +260,6 @@ __vmptrld(uintptr_t vmcs_pa)
         return 0;
 }
 
-static inline int
-__vmclear(uintptr_t vmcs_pa)
-{
-        u64 rflags;
-        __asm__ __volatile__(
-                "vmclear %1;"
-                SAVE_RFLAGS(rflags)
-                :"m"(vmcs_pa));
-        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
-                return -1;
-        return 0;
-}
-
 static inline void
 __vmwrite(u64 field, u64 value)
 {
@@ -322,7 +328,6 @@ extern u16 __str(void);
 extern int __vmxon(uintptr_t vmxon_region_pa);
 extern void __vmxoff(void);
 extern int __vmptrld(uintptr_t vmcs_pa);
-extern int __vmclear(uintptr_t vmcs_pa);
 extern void __vmwrite(u64 field, u64 value);
 extern u64 __vmread(u64 field);
 
