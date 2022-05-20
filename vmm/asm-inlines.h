@@ -51,6 +51,17 @@ __vmclear(uintptr_t vmcs_pa)
         return 0;
 }
 
+static inline u16
+__lsl(u16 seg)
+{
+        u16 limit;
+#ifdef WIN32
+        limit = (u16)__segmentlimit(seg);
+#else
+        __asm__ __volatile__("lsl %1, %0":"=r"(limit):"r"(seg));
+#endif
+        return limit;
+}
 
 #if defined(__GNUC__) || defined(__INTEL_COMPILER)
 
@@ -173,14 +184,6 @@ __lar(u16 seg)
         u32 attrs;
         __asm__ __volatile__("lar %1, %0":"=r"(attrs):"r"((u32)seg));
         return attrs;
-}
-
-static inline u16
-__lsl(u16 seg)
-{
-        u16 limit;
-        __asm__ __volatile__("lsl %1, %0":"=r"(limit):"r"(seg));
-        return limit;
 }
 
 static inline u16
@@ -316,7 +319,6 @@ extern u16 __get_fs(void);
 extern u16 __get_gs(void);
 
 extern u32 __lar(u16 seg);
-extern u16 __lsl(u16 seg);
 
 extern u16 __sldt(void);
 extern void __get_gdt(descriptor_t *gdt);
