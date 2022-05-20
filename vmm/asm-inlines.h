@@ -51,6 +51,20 @@ __vmclear(uintptr_t vmcs_pa)
         return 0;
 }
 
+static inline u64
+__get_tsc(void)
+{
+#ifdef WIN32
+        return __rdtsc();
+#else
+        u32 eax, edx;
+        __asm__ __volatile__(
+                "rdtsc"
+                :"=a"(eax), "=d"(edx));
+        return ((u64)edx << 32) | eax;
+#endif
+}
+
 static inline u16
 __lsl(u16 seg)
 {
@@ -298,16 +312,6 @@ __vmread(u64 field)
 }
 
 static inline u64
-__get_tsc(void)
-{
-        u32 eax, edx;
-        __asm__ __volatile__(
-                "rdtsc"
-                :"=a"(eax), "=d"(edx));
-        return ((u64)edx << 32) | eax;
-}
-
-static inline u64
 __get_rflags(void)
 {
         u64 rflags;
@@ -343,8 +347,6 @@ extern void __vmxoff(void);
 extern int __vmptrld(uintptr_t vmcs_pa);
 extern void __vmwrite(u64 field, u64 value);
 extern u64 __vmread(u64 field);
-
-extern u64 __get_tsc(void);
 
 extern u64 __get_rflags(void);
 
