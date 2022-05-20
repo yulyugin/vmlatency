@@ -171,17 +171,21 @@ __set_cr4(u64 cr4)
 #endif
 }
 
-#if defined(__GNUC__) || defined(__INTEL_COMPILER)
-
 static inline u64 __rdmsr(u32 msr_num)
 {
+#ifdef WIN32
+        return __readmsr(msr_num);
+#else
         u32 eax, edx;
         __asm__ __volatile__(
                 "rdmsr"
                 :"=a"(eax), "=d"(edx)
                 :"c"(msr_num));
         return ((u64)edx << 32) | eax;
+#endif
 }
+
+#if defined(__GNUC__) || defined(__INTEL_COMPILER)
 
 static inline u16
 __get_es(void)
@@ -333,8 +337,6 @@ __get_rflags(void)
 }
 
 #else  /* !__GNUC__ */
-
-extern u64 __rdmsr(u32 msr_num);
 
 extern u16 __get_es(void);
 extern u16 __get_cs(void);
