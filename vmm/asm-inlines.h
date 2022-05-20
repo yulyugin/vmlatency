@@ -105,6 +105,26 @@ __get_tsc(void)
 #endif
 }
 
+static inline void
+__get_idt(descriptor_t *idtr)
+{
+#ifdef WIN32
+        __sidt(idtr);
+#else
+        __asm__ __volatile__("sidt %0":"=m"(*idtr));
+#endif
+}
+
+static inline void
+__set_idt(descriptor_t *idtr)
+{
+#ifdef WIN32
+        __lidt(idtr);
+#else
+        __asm__ __volatile__("lidt %0"::"m"(*idtr));
+#endif
+}
+
 static inline u16
 __lsl(u16 seg)
 {
@@ -263,18 +283,6 @@ __set_gdt(descriptor_t *gdtr)
         __asm__ __volatile__("lgdt %0"::"m"(*gdtr));
 }
 
-static inline void
-__get_idt(descriptor_t *idtr)
-{
-        __asm__ __volatile__("sidt %0":"=m"(*idtr));
-}
-
-static inline void
-__set_idt(descriptor_t *idtr)
-{
-        __asm__ __volatile__("lidt %0"::"m"(*idtr));
-}
-
 static inline u16
 __str(void)
 {
@@ -350,8 +358,6 @@ extern u32 __lar(u16 seg);
 extern u16 __sldt(void);
 extern void __get_gdt(descriptor_t *gdt);
 extern void __set_gdt(descriptor_t *gdt);
-extern void __get_idt(descriptor_t *idt);
-extern void __set_idt(descriptor_t *idt);
 extern u16 __str(void);
 
 extern int __vmxon(uintptr_t vmxon_region_pa);
