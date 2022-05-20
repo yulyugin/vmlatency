@@ -63,6 +63,60 @@ __lsl(u16 seg)
         return limit;
 }
 
+static inline u64
+__get_cr3(void)
+{
+        u64 cr3;
+#ifdef WIN32
+        cr3 = __readcr3();
+#else
+        __asm__ __volatile__(
+                "movq %%cr3, %0"
+                :"=r"(cr3):);
+#endif
+        return cr3;
+}
+
+static inline u64
+__get_cr0(void)
+{
+        u64 cr0;
+#ifdef WIN32
+        cr0 = __readcr0();
+#else
+        __asm__ __volatile__(
+                "movq %%cr0, %0"
+                :"=r"(cr0):);
+#endif
+        return cr0;
+}
+
+static inline u64
+__get_cr4(void)
+{
+        u64 cr4;
+#ifdef WIN32
+        cr4 = __readcr4();
+#else
+        __asm__ __volatile__(
+                "movq %%cr4, %0"
+                :"=r"(cr4):);
+#endif
+        return cr4;
+}
+
+static inline void
+__set_cr4(u64 cr4)
+{
+#ifdef WIN32
+        __writecr4(cr4);
+#else
+        __asm__ __volatile__(
+                "movq %0, %%cr4"
+                ::"r"(cr4));
+#endif
+}
+
 #if defined(__GNUC__) || defined(__INTEL_COMPILER)
 
 static inline void
@@ -90,44 +144,6 @@ static inline u64 __rdmsr(u32 msr_num)
                 :"=a"(eax), "=d"(edx)
                 :"c"(msr_num));
         return ((u64)edx << 32) | eax;
-}
-
-static inline u64
-__get_cr0(void)
-{
-        u64 cr0;
-        __asm__ __volatile__(
-                "movq %%cr0, %0"
-                :"=r"(cr0):);
-        return cr0;
-}
-
-static inline u64
-__get_cr3(void)
-{
-        u64 cr3;
-        __asm__ __volatile__(
-                "movq %%cr3, %0"
-                :"=r"(cr3):);
-        return cr3;
-}
-
-static inline u64
-__get_cr4(void)
-{
-        u64 cr4;
-        __asm__ __volatile__(
-                "movq %%cr4, %0"
-                :"=r"(cr4):);
-        return cr4;
-}
-
-static inline void
-__set_cr4(u64 cr4)
-{
-        __asm__ __volatile__(
-                "movq %0, %%cr4"
-                ::"r"(cr4));
 }
 
 static inline u16
@@ -305,11 +321,6 @@ extern void __cpuid_all(u32 l, u32 subl, u32 *eax, u32 *ebx, u32 *ecx, u32 *edx)
 extern u32 __cpuid_ecx(u32 leaf, u32 subleaf);
 
 extern u64 __rdmsr(u32 msr_num);
-
-extern u64 __get_cr0(void);
-extern u64 __get_cr3(void);
-extern u64 __get_cr4(void);
-extern void __set_cr4(u64 cr4);
 
 extern u16 __get_es(void);
 extern u16 __get_cs(void);
