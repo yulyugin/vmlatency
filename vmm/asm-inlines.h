@@ -77,6 +77,24 @@ __vmclear(uintptr_t vmcs_pa)
         return 0;
 }
 
+static inline int
+__vmptrld(uintptr_t vmcs_pa)
+{
+#ifdef WIN32
+        if (__vmx_vmptrld(&vmcs_pa))
+                return -1;
+#else
+        u64 rflags;
+        __asm__ __volatile__(
+                "vmptrld %1;"
+                SAVE_RFLAGS(rflags)
+                :"m"(vmcs_pa));
+        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
+                return -1;
+#endif
+        return 0;
+}
+
 static inline u64
 __vmread(u64 field)
 {
@@ -315,19 +333,6 @@ __vmxoff(void)
         __asm__ __volatile__("vmxoff");
 }
 
-static inline int
-__vmptrld(uintptr_t vmcs_pa)
-{
-        u64 rflags;
-        __asm__ __volatile__(
-                "vmptrld %1;"
-                SAVE_RFLAGS(rflags)
-                :"m"(vmcs_pa));
-        if (rflags & (RFLAGS_CF | RFLAGS_ZF))
-                return -1;
-        return 0;
-}
-
 static inline void
 __vmwrite(u64 field, u64 value)
 {
@@ -362,7 +367,6 @@ extern u16 __str(void);
 
 extern int __vmxon(uintptr_t vmxon_region_pa);
 extern void __vmxoff(void);
-extern int __vmptrld(uintptr_t vmcs_pa);
 extern void __vmwrite(u64 field, u64 value);
 
 extern u64 __get_rflags(void);
