@@ -15,7 +15,7 @@
 ; along with this program. If not, see <http://www.gnu.org/licenses/>.
 ;
 
-public __get_gdt, __set_gdt, __sldt, __lar
+public __get_gdt, __set_gdt, __sldt, __lar, __str
 public __get_es, __get_cs, __get_ss, __get_ds, __get_fs, __get_gs, __get_ds
 
 .code
@@ -38,6 +38,11 @@ __sldt:
 ; u32 __lar(u16 seg)
 __lar:
         lar rax, rcx
+        ret
+
+; u16 __str(void);
+__str:
+        str rax
         ret
 
 ; u16 __get_es(void);
