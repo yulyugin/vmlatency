@@ -131,6 +131,23 @@ __vmread(u64 field)
         return ret;
 }
 
+static inline void
+__vmwrite(u64 field, u64 value)
+{
+#ifdef WIN32
+#ifdef __INTEL_COMPILER
+        /* XXX: Workaround for ICC bug. The memory barrier prevents ICC from
+         * removing vmwrite instruction. */
+        __asm__ __volatile__("": : :"memory");
+#endif
+        __vmx_vmwrite(field, value);
+#else
+        __asm__ __volatile__(
+                "vmwrite %1, %0;"
+                ::"r"(field), "m"(value));
+#endif
+}
+
 static inline u64
 __get_tsc(void)
 {
@@ -349,14 +366,6 @@ __vmxoff(void)
         __asm__ __volatile__("vmxoff");
 }
 
-static inline void
-__vmwrite(u64 field, u64 value)
-{
-        __asm__ __volatile__(
-                "vmwrite %1, %0;"
-                ::"r"(field), "m"(value));
-}
-
 #else  /* !__GNUC__ */
 
 extern u16 __get_es(void);
@@ -374,7 +383,6 @@ extern void __set_gdt(descriptor_t *gdt);
 extern u16 __str(void);
 
 extern void __vmxoff(void);
-extern void __vmwrite(u64 field, u64 value);
 
 #endif /* !__GNUC__ */
 
