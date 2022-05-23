@@ -15,7 +15,7 @@
 ; along with this program. If not, see <http://www.gnu.org/licenses/>.
 ;
 
-public __get_gdt, __set_gdt
+public __get_gdt, __set_gdt, __sldt
 
 .code
 
@@ -27,6 +27,11 @@ __get_gdt:
 ; void __set_gdt(descriptor_t *gdt);
 __set_gdt:
         lgdt fword ptr [rcx]
+        ret
+
+; u16 __sldt(void);
+__sldt:
+        sldt rax
         ret
 
 end
