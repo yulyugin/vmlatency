@@ -81,6 +81,21 @@ __vmxon(uintptr_t vmxon_region_pa)
         return 0;
 }
 
+static inline void
+__vmxoff(void)
+{
+#ifdef WIN32
+#ifdef __INTEL_COMPILER
+        /* XXX: Workaround for ICC bug. The memory barrier prevents ICC from
+         * removing vmwrite instruction. */
+        __asm__ __volatile__("": : :"memory");
+#endif
+        __vmx_off();
+#else
+        __asm__ __volatile__("vmxoff");
+#endif
+}
+
 static inline int
 __vmclear(uintptr_t vmcs_pa)
 {
@@ -358,12 +373,6 @@ __str(void)
         u16 tr;
         __asm__ __volatile__("str %0" :"=r"(tr));
         return tr;
-}
-
-static inline void
-__vmxoff(void)
-{
-        __asm__ __volatile__("vmxoff");
 }
 
 #else  /* !__GNUC__ */
