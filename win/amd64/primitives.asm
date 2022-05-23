@@ -16,10 +16,11 @@
 ;
 
 public __get_gdt, __set_gdt, __sldt, __lar
+public __get_es, __get_cs, __get_ss, __get_ds, __get_fs, __get_gs, __get_ds
 
 .code
 
-; void __get_gdt(descriptor_t *gdtr)
+; void __get_gdt(descriptor_t *gdtr);
 __get_gdt:
         sgdt fword ptr [rcx]
         ret
@@ -37,6 +38,36 @@ __sldt:
 ; u32 __lar(u16 seg)
 __lar:
         lar rax, rcx
+        ret
+
+; u16 __get_es(void);
+__get_es:
+        mov rax, es
+        ret
+
+; u16 __get_cs(void);
+__get_cs:
+        mov rax, cs
+        ret
+
+; u16 __get_ss(void);
+__get_ss:
+        mov rax, ss
+        ret
+
+; u16 __get_ds(void);
+__get_ds:
+        mov rax, ds
+        ret
+
+; u16 __get_fs(void);
+__get_fs:
+        mov rax, fs
+        ret
+
+; u16 __get_gs(void);
+__get_gs:
+        mov rax, gs
         ret
 
 end
