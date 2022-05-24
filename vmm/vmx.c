@@ -20,6 +20,8 @@
 #include "asm-inlines.h"
 #include "cpu-defs.h"
 
+#define VMX_ITERATIONS 20
+
 extern void guest_code(void);
 
 typedef struct {
@@ -486,12 +488,12 @@ handle_vmexit(void)
 void
 measure_vmlatency()
 {
-        const int iterations = 20;
+        u64 stats[VMX_ITERATIONS];
+        u64 start;
         vm_monitor_t vmm = {0};
         int cnt;  /* error counter for memory allocation */
         int i, n;  /* loop counters */
         irq_flags_t irq_flags;
-        u64 start, end;
         host_state_t  hs;
 
         cache_vmx_capabilities(&vmm);
@@ -523,14 +525,13 @@ measure_vmlatency()
 
         handle_vmexit();
 
-        for (n = 0; n < iterations; ++n) {
+        for (n = 0; n < VMX_ITERATIONS; ++n) {
                 start = __get_tsc();
                 for (i = 0; i < __BIT(n); ++i) {
                         do_vmresume();
                 }
-                end = __get_tsc();
-                vmlatency_printk("%6d - %lld\n",
-                                 __BIT(n), (end - start) / __BIT(n));
+                stats[n] = (__get_tsc() - start) / __BIT(n);
+                vmlatency_printk("%6d - %lld\n", __BIT(n), stats[n]);
         }
 
 out4:
