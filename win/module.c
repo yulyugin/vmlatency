@@ -20,6 +20,7 @@
 #include "api.h"
 #include "vmx.h"
 
+PDEVICE_OBJECT g_Device = NULL;
 #define NT_DEVICE_NAME  L"\\Device\\VMLATENCY"
 
 DRIVER_INITIALIZE DriverEntry;
@@ -35,13 +36,12 @@ DriverEntry(__in PDRIVER_OBJECT DriverObject,
         NTSTATUS ntStatus;
         UNICODE_STRING ntUnicodeString;
         UNICODE_STRING ntWin32NameString;
-        PDEVICE_OBJECT deviceObject = NULL;
 
         RtlInitUnicodeString(&ntUnicodeString, NT_DEVICE_NAME);
 
         ntStatus = IoCreateDevice(DriverObject, 0, &ntUnicodeString,
                                   FILE_DEVICE_UNKNOWN, FILE_DEVICE_SECURE_OPEN,
-                                  FALSE, &deviceObject);
+                                  FALSE, &g_Device);
 
         if (!NT_SUCCESS(ntStatus)) {
                 vmlatency_printk("Couldn't create the device object\n");
@@ -62,4 +62,5 @@ VmlatencyUnloadDriver(__in PDRIVER_OBJECT DriverObject) {
 
         if (deviceObject != NULL)
                 IoDeleteDevice(deviceObject);
+        g_Device = NULL;
 }

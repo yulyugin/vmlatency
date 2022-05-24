@@ -16,19 +16,46 @@
 */
 
 #include <ntddk.h>
+#include <ntstrsafe.h>
 #include <stdarg.h>
 #include <string.h>
 
 #include "api.h"
+#include "messages.h"
 
-int
+#define MAX_MSG_SZ     (ERROR_LOG_MAXIMUM_SIZE - sizeof(IO_ERROR_LOG_PACKET))
+#define MAX_MSG_CH     (MAX_MSG_SZ / sizeof(WCHAR))
+
+void
 vmlatency_printm(const char *fmt, ...)
 {
-    va_list va;
-    va_start(va, fmt);
-    vDbgPrintExWithPrefix("", DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, fmt, va);
-    va_end(va);
-    return 0;
+        va_list va;
+        va_start(va, fmt);
+        vDbgPrintExWithPrefix("", DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL,
+                              fmt, va);
+
+        if (KeGetCurrentIrql() == PASSIVE_LEVEL) {
+                extern PDEVICE_OBJECT g_Device;
+                PIO_ERROR_LOG_PACKET entry = IoAllocateErrorLogEntry(
+                        g_Device, ERROR_LOG_MAXIMUM_SIZE);
+                char msg[MAX_MSG_CH];
+
+                if (!entry)
+                        return;
+
+                entry->ErrorCode = VMLATENCY_LOG;
+                entry->NumberOfStrings = 1;
+                entry->StringOffset = FIELD_OFFSET(IO_ERROR_LOG_PACKET,
+                                                   DumpData);
+                RtlStringCbVPrintfA(msg, sizeof(msg), fmt, va);
+
+                RtlUTF8ToUnicodeN((PWSTR)entry->DumpData, MAX_MSG_SZ, NULL,
+                                  msg, sizeof(msg));
+                IoWriteErrorLogEntry(entry);
+        }
+
+        va_end(va);
+        return;
 }
 
 void

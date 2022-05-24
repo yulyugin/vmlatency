@@ -54,8 +54,44 @@ Function Build([String]$Component) {
     }
 }
 
+Function Setup-EventLog([String]$Driver) {
+    $Xreg = 'HKLM:SYSTEM\CurrentControlSet\Services\EventLog\System\vmlatency'
+
+    $Param = @{
+        'Path' = $Xreg
+        'ErrorAction' = 'SilentlyContinue'
+    }
+    If (-Not (Get-Item @Param)) {
+        $Param = @{
+            'Path' = 'HKLM:\SYSTEM\CurrentControlSet\Services\EventLog\System'
+            'name' = 'vmlatency'
+        }
+        New-Item @Param > $null
+    }
+
+    $Param = @{
+        'Path' = $Xreg
+        'Name' = 'EventMessageFile'
+        'PropertyType' = 'String'
+        'Value' = $Driver
+        'ErrorAction' = 'SilentlyContinue'
+    }
+    New-ItemProperty @Param > $null
+
+    $Param = @{
+       'Path' = $Xreg
+       'Name' = 'TypesSupported'
+       'PropertyType' = 'Dword'
+       'Value' = 0x00000007
+       'ErrorAction' = 'SilentlyContinue'
+    }
+    New-ItemProperty @Param > $null
+}
+
 Function Load-Vmlatency() {
     $Driver = "$VmlatencyRoot\build-win7-fre\amd64\vmlatency.sys"
+
+    Setup-EventLog $Driver
 
     # It's impossible to create kernel service using New-Service cmdlet
     $ScArgs = "create vmlatency binPath=$Driver type=kernel"
@@ -89,6 +125,12 @@ Function Unload-Vmlatency() {
         Echo "*** Failed to delete vmlatency service"
         Exit 1
     }
+
+    $Param = @{
+        'Path' = 'HKLM:SYSTEM\CurrentControlSet\Services\EventLog\System\vmlatency'
+        'ErrorAction' = 'SilentlyContinue'
+    }
+    Remove-Item @Param > $null
 }
 
 Function SetupBuildEnvironment() {

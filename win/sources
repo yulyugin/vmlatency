@@ -5,5 +5,5 @@ TARGETLIBS=$(TARGETPATH)/*/vmm.lib
 
 INCLUDES=../vmm
 
-SOURCES=module.c api.c
+SOURCES=module.c api.c vmlatency.rc messages.mc
 AMD64_SOURCES=guest.asm vmentry.asm primitives.asm

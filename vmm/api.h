@@ -75,7 +75,7 @@ void free_vmpage(vmpage_t *p);
 void vmlatency_preempt_disable(irq_flags_t *irq_flags);
 void vmlatency_preempt_enable(irq_flags_t *irq_flags);
 
-int vmlatency_printm(const char *fmt, ...);
+void vmlatency_printm(const char *fmt, ...);
 
 #ifdef __cplusplus
 }
