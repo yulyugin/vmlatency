@@ -490,6 +490,7 @@ measure_vmlatency()
 {
         u64 stats[VMX_ITERATIONS];
         u64 start;
+        bool vmlaunch_happened = false;
         vm_monitor_t vmm = {0};
         int cnt;  /* error counter for memory allocation */
         int i, n;  /* loop counters */
@@ -523,6 +524,7 @@ measure_vmlatency()
                 goto out4;
         }
 
+        vmlaunch_happened = true;
         handle_vmexit();
 
         for (n = 0; n < VMX_ITERATIONS; ++n) {
@@ -531,7 +533,6 @@ measure_vmlatency()
                         do_vmresume();
                 }
                 stats[n] = (__get_tsc() - start) / __BIT(n);
-                vmlatency_printk("%6d - %lld\n", __BIT(n), stats[n]);
         }
 
 out4:
@@ -544,4 +545,9 @@ out2:
         vmlatency_preempt_enable(&irq_flags);
 out1:
         free_memory(&vmm, cnt);
+
+        if (vmlaunch_happened) {
+                for (n = 0; n < VMX_ITERATIONS; ++n)
+                        vmlatency_printk("%6d - %lld\n", __BIT(n), stats[n]);
+        }
 }
