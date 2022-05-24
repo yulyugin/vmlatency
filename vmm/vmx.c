@@ -486,6 +486,7 @@ handle_vmexit(void)
 void
 measure_vmlatency()
 {
+        const int iterations = 20;
         vm_monitor_t vmm = {0};
         int cnt;  /* error counter for memory allocation */
         int i, n;  /* loop counters */
@@ -522,13 +523,14 @@ measure_vmlatency()
 
         handle_vmexit();
 
-        for (n = 1; n < __BIT(20); n *= 2) {
+        for (n = 0; n < iterations; ++n) {
                 start = __get_tsc();
-                for (i = 0; i < n; i++) {
+                for (i = 0; i < __BIT(n); ++i) {
                         do_vmresume();
                 }
                 end = __get_tsc();
-                vmlatency_printk("%6d - %lld\n", n, (end - start) / n);
+                vmlatency_printk("%6d - %lld\n",
+                                 __BIT(n), (end - start) / __BIT(n));
         }
 
 out4:
