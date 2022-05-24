@@ -55,7 +55,6 @@ vmlatency_printm(const char *fmt, ...)
         }
 
         va_end(va);
-        return;
 }
 
 void
