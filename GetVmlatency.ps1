@@ -248,6 +248,15 @@ Function SetTestsigning($Value) {
     }
 }
 
+Function Dump-Results([System.DateTime]$StartTime) {
+    $CPUName = @(Get-WmiObject win32_processor)[0].name
+
+    $L = (Get-EventLog -LogName System -Message *vmlatency]* -After $StartTime)
+    [Array]::Reverse($L)
+    $Data = $L.Message.Replace("[vmlatency] ", "").Replace("`n", "")
+    Set-Content -Path ($CPUName + ".txt") -Value $Data
+}
+
 Switch ($Command) {
     "set-testsigning" { SetupSelfSigning }
     "clean-testsigning" { CleanupSelfSigning }
@@ -259,7 +268,9 @@ Switch ($Command) {
 
         If ($Command -Eq "measure") {
             Sign "$VmlatencyRoot\build-win7-fre\amd64\vmlatency.sys"
+            $StartTime = Get-Date
             Load-Vmlatency
+            Dump-Results $StartTime
             Unload-Vmlatency
         }
     }
