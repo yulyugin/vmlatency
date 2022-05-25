@@ -44,15 +44,13 @@ free_vmpage(vmpage_t *p)
         p->pa = 0;
 }
 
-int
+void
 vmlatency_printm(const char *fmt, ...)
 {
-        int ret;
         va_list va;
         va_start(va, fmt);
-        ret = vprintk(fmt, va);
+        vprintk(fmt, va);
         va_end(va);
-        return ret;
 }
 
 void
