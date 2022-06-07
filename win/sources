@@ -7,3 +7,5 @@ INCLUDES=../vmm
 
 SOURCES=module.c api.c vmlatency.rc messages.mc
 AMD64_SOURCES=guest.asm vmentry.asm primitives.asm
+
+USER_C_FLAGS=/Oi $(USER_C_FLAGS)
