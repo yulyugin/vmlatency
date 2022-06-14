@@ -15,10 +15,16 @@
 ; along with this program. If not, see <http://www.gnu.org/licenses/>.
 ;
 
+public _disable
 public __get_gdt, __set_gdt, __sldt, __lar, __str
 public __get_es, __get_cs, __get_ss, __get_ds, __get_fs, __get_gs, __get_ds
 
 .code
+
+; void _disable(void);
+_disable:
+        cli
+        ret
 
 ; void __get_gdt(descriptor_t *gdtr);
 __get_gdt:

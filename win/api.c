@@ -26,6 +26,10 @@
 #define MAX_MSG_SZ     (ERROR_LOG_MAXIMUM_SIZE - sizeof(IO_ERROR_LOG_PACKET))
 #define MAX_MSG_CH     (MAX_MSG_SZ / sizeof(WCHAR))
 
+#ifndef _M_IX86
+extern void _disable(void);
+#endif
+
 void
 vmlatency_printm(const char *fmt, ...)
 {
