@@ -181,6 +181,11 @@ static inline void
 __get_idt(descriptor_t *idtr)
 {
 #ifdef WIN32
+#ifdef __INTEL_COMPILER
+        /* XXX: Workaround for ICC bug. The memory barrier prevents ICC from
+         * removing vmwrite instruction. */
+        __asm__ __volatile__("": : :"memory");
+#endif
         __sidt(idtr);
 #else
         __asm__ __volatile__("sidt %0":"=m"(*idtr));
@@ -191,6 +196,11 @@ static inline void
 __set_idt(descriptor_t *idtr)
 {
 #ifdef WIN32
+#ifdef __INTEL_COMPILER
+        /* XXX: Workaround for ICC bug. The memory barrier prevents ICC from
+         * removing vmwrite instruction. */
+        __asm__ __volatile__("": : :"memory");
+#endif
         __lidt(idtr);
 #else
         __asm__ __volatile__("lidt %0"::"m"(*idtr));
@@ -255,6 +265,11 @@ static inline void
 __set_cr4(u64 cr4)
 {
 #ifdef WIN32
+#ifdef __INTEL_COMPILER
+        /* XXX: Workaround for ICC bug. The memory barrier prevents ICC from
+         * removing vmwrite instruction. */
+        __asm__ __volatile__("": : :"memory");
+#endif
         __writecr4(cr4);
 #else
         __asm__ __volatile__(
